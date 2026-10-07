@@ -1,0 +1,38 @@
+{
+  "mock": true,
+  "leverancier": "Greenchoice (MOCK)",
+  "netbeheerder": "Liander",
+  "aansluiting": "3x25A",
+  "dalVanafUur": 23,
+  "locatie": { "plaats": "Utrecht", "lat": 52.09, "lon": 5.12 },
+  "opmerkingen": ["MOCK-DATA: verzonnen voorbeeld. Zet je eigen nota's in data/jaarnotas.json (zelfde opbouw)."],
+  "notas": [
+    {
+      "label": "2025",
+      "notanummer": "MOCK",
+      "notadatum": "2026-01-15",
+      "periode": { "van": "2025-01-01", "tot": "2026-01-01" },
+      "levering": { "normaal": 1684, "dal": 3097 },
+      "teruglevering": { "normaal": 4303, "dal": 1540 },
+      "nettoTeruglevering": 1062,
+      "tarieven": {
+        "leveringNormaalExcl": 0.14835,
+        "leveringDalExcl": 0.14835,
+        "terugleververgoeding": 0.15,
+        "terugleverkostenPerKwh": 0.115,
+        "vasteLeveringskostenPerDagExcl": 0.21153,
+        "netbeheerPerDagExcl": 1.0645,
+        "verminderingPerDagExcl": -1.43822
+      },
+      "bedragen": {
+        "stroomNaSaldering": -159.3,
+        "energiebelasting": 0,
+        "terugleverkosten": 671.95,
+        "vasteLeveringskosten": 93.42,
+        "netbeheer": 470.0,
+        "vermindering": -635.19,
+        "totaal": 440.88
+      }
+    }
+  ]
+}
