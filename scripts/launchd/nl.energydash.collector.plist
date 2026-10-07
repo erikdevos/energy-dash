@@ -2,6 +2,8 @@
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
 <!--
   Laat de P1-collector altijd op de achtergrond draaien zolang je Mac aan staat (ook na herstart/inloggen).
+  Eerst invullen: vervang /PAD/NAAR/energy-dash door de projectmap (uitkomst van `pwd` in de projectmap)
+                 en /PAD/NAAR/node door de uitkomst van `which node`. launchd kent geen variabelen zoals $HOME.
   Installeren:   cp scripts/launchd/nl.energydash.collector.plist ~/Library/LaunchAgents/
                  launchctl load ~/Library/LaunchAgents/nl.energydash.collector.plist
   Stoppen:       launchctl unload ~/Library/LaunchAgents/nl.energydash.collector.plist
@@ -12,10 +14,10 @@
   <key>Label</key>
   <string>nl.energydash.collector</string>
   <key>WorkingDirectory</key>
-  <string>/Users/familiedevos/Documents/erik/projects/energy-dash</string>
+  <string>/PAD/NAAR/energy-dash</string>
   <key>ProgramArguments</key>
   <array>
-    <string>/Users/familiedevos/.nvm/versions/node/v22.23.3/bin/node</string>
+    <string>/PAD/NAAR/node</string>
     <string>--env-file-if-exists=.env</string>
     <string>server/collect.ts</string>
   </array>
@@ -24,8 +26,8 @@
   <key>KeepAlive</key>
   <true/>
   <key>StandardOutPath</key>
-  <string>/Users/familiedevos/Documents/erik/projects/energy-dash/data/collector.log</string>
+  <string>/PAD/NAAR/energy-dash/data/collector.log</string>
   <key>StandardErrorPath</key>
-  <string>/Users/familiedevos/Documents/erik/projects/energy-dash/data/collector.log</string>
+  <string>/PAD/NAAR/energy-dash/data/collector.log</string>
 </dict>
 </plist>
