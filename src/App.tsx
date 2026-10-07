@@ -9,6 +9,8 @@ import { buildInsights } from './model/insights';
 import { PLAN_ORDER, planOn, roadTo2027, setPlan, type PlanId } from './model/overview';
 import { Overview, type Tab } from './components/overview/Overview';
 import { PricesToday } from './components/PricesToday';
+import { SuppliersTab } from './components/SuppliersTab';
+import { rankSuppliers, type SupplierData } from './model/suppliers';
 import { projectSettlement } from './model/settlement';
 import type { Scenario, YearData } from './model/types';
 import { ComparePanel, type MatrixRow, type SavedScenario } from './components/ComparePanel';
@@ -116,6 +118,7 @@ export default function App() {
     { id: 'nu', label: 'Nu' },
     { id: 'verbruik', label: 'Verbruik' },
     { id: 'scenarios', label: "Scenario's" },
+    { id: 'leveranciers', label: 'Leveranciers' },
     { id: 'gegevens', label: 'Gegevens' },
   ];
   const [tab, setTabState] = useState<Tab>(() => {
@@ -125,7 +128,7 @@ export default function App() {
   useEffect(() => {
     const onHash = () => {
       const h = window.location.hash.slice(1) as Tab;
-      if (['overzicht', 'nu', 'verbruik', 'scenarios', 'gegevens'].includes(h)) setTabState(h);
+      if (['overzicht', 'nu', 'verbruik', 'scenarios', 'leveranciers', 'gegevens'].includes(h)) setTabState(h);
     };
     window.addEventListener('hashchange', onHash);
     return () => window.removeEventListener('hashchange', onHash);
@@ -140,6 +143,10 @@ export default function App() {
   const [error, setError] = useState<string | null>(null);
   const [notas, setNotas] = useState<JaarnotaSet | null>(null);
   const [maanden, setMaanden] = useState<MaandData | null>(null);
+  const [suppliers, setSuppliers] = useState<SupplierData | null>(null);
+  useEffect(() => {
+    api.leveranciers().then(setSuppliers).catch(() => setSuppliers(null));
+  }, []);
   /** na een wijziging van locatie/dak/weerjaar opnieuw afstemmen zodra de nieuwe data er is */
   const [recalibrate, setRecalibrate] = useState(false);
 
@@ -289,6 +296,12 @@ export default function App() {
     () => (deferred && startpunt && data ? planImpact(deferred, startpunt, planPresets, data) : null),
     [deferred, startpunt, planPresets, data],
   );
+
+  // Leveranciers voor 2027: je huishouden zoals nu en met de plannen die aan staan.
+  const supplierRows = useMemo(() => {
+    if (!suppliers || !startpunt || !deferred || !data || tab !== 'leveranciers') return null;
+    return { now: rankSuppliers(startpunt, suppliers, data), plans: rankSuppliers(deferred, suppliers, data) };
+  }, [suppliers, startpunt, deferred, data, tab]);
 
   const savedWithTotals = useMemo(
     () => (data ? saved.map((s) => ({ ...s, total: run(s.scenario, data).total })) : saved),
@@ -505,6 +518,20 @@ export default function App() {
               />
             </>
           )}
+
+          {tab === 'leveranciers' &&
+            (suppliers && supplierRows ? (
+              <SuppliersTab
+                data={suppliers}
+                nowRows={supplierRows.now}
+                planRows={supplierRows.plans}
+                plansActive={Object.values(plansOn).some(Boolean)}
+                current={notas?.leverancier ?? 'Greenchoice'}
+                priceYear={data.priceYear}
+              />
+            ) : (
+              <p className="hint">Geen leveranciersgegevens gevonden (data/leveranciers.json).</p>
+            ))}
 
           {tab === 'gegevens' && (
             <>

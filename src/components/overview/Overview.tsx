@@ -8,7 +8,7 @@ import { TermijnInput } from '../Summary';
 import { EnergySplit } from './EnergySplit';
 import { Waterfall } from './Waterfall';
 
-export type Tab = 'overzicht' | 'nu' | 'verbruik' | 'scenarios' | 'gegevens';
+export type Tab = 'overzicht' | 'nu' | 'verbruik' | 'scenarios' | 'leveranciers' | 'gegevens';
 
 interface Props {
   settlement: Settlement | null;

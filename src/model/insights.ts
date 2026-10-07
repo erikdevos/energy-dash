@@ -14,7 +14,7 @@ export interface Insight {
   title: string;
   value: string;
   text: string;
-  tab?: 'nu' | 'verbruik' | 'scenarios' | 'gegevens';
+  tab?: 'nu' | 'verbruik' | 'scenarios' | 'leveranciers' | 'gegevens';
 }
 
 const eur = (v: number) => `€ ${Math.round(Math.abs(v)).toLocaleString('nl-NL')}`;

@@ -5,7 +5,7 @@ const SOURCES: Array<[string, string, string]> = [
   ['Energiebelasting en vermindering 2026', 'Rijksoverheid', 'https://www.rijksoverheid.nl/onderwerpen/energie-thuis/vraag-en-antwoord/opbouw-energierekening'],
   ['Energiebelasting 2027 (voorstel)', 'Belastingplan 2027, fiscale sleuteltabel', 'https://www.rijksfinancien.nl/sites/default/files/bestanden/belastingplan-2027/pakket-belastingplan-2027/Fiscale-sleuteltabel-2027-incl-correctie-tarieven-energiebelasting-zelfstandigenaftrek.pdf'],
   ['Greenchoice tarieven, terugleververgoeding en terugleverkosten', 'keuze.nl (Greenchoice publiceert zelf geen bedragen)', 'https://www.keuze.nl/energie/energieleveranciers/greenchoice'],
-  ['Greenchoice verwachting 2027', 'Greenchoice rekenvoorbeeld nettoterugleveraar', 'https://www.greenchoice.nl/zonnepanelen/salderingsregeling/rekenvoorbeelden/nettoterugleveraar/'],
+  ['Terugleververgoeding en -kosten 2027 per leverancier (o.a. Greenchoice 8,1 / 7,9 ct)', 'Energievergelijk.nl, 3-10-2026', 'https://www.energievergelijk.nl/nieuws/deze-5-energieleveranciers-betalen-in-2027-het-minst-voor-je-zonnestroom'],
   ['Daltarief Enexis Brabant/Limburg vanaf 21:00', 'Radar (AVROTROS)', 'https://radar.avrotros.nl/artikel/piek-en-daltarief-niet-overal-even-laat-in-nederland-34881'],
   ['Netbeheerkosten Liander 2026', 'Liander tarievenblad', 'https://www.liander.nl/-/media/files/tarieven/consument/2026/jaarlijkse-netwerkkosten-stroom-2026-v10.pdf'],
   ['Dynamisch: inkoop- en verkoopvergoeding', 'Tibber', 'https://tibber.com/nl/energiecontract'],

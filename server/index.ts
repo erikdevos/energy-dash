@@ -73,6 +73,8 @@ const server = createServer(async (req, res) => {
         const resMin = [15, 60, 1440].includes(Number(q.get('res'))) ? Number(q.get('res')) : 60;
         return json(res, 200, await chargee.history(num(q.get('days'), 2, 1, 800), resMin));
       }
+      case '/api/leveranciers':
+        return json(res, 200, (await readJson(join(DATA_DIR, 'leveranciers.json'))) ?? { contracten: [] });
       case '/api/maanden':
         return json(res, 200, (await readJson(join(DATA_DIR, 'maanden.json'))) ?? { maanden: [] });
       case '/api/jaarnotas': {

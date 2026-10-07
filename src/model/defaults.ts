@@ -41,6 +41,7 @@ export const BASE_SCENARIO: Scenario = {
     terugleververgoeding: 0.15, // Greenchoice vast, keuze.nl
     opslag: 0.018, // Tibber inkoopvergoeding incl. BTW
     terugleverOpslag: 0.018, // Tibber verkoopvergoeding
+    terugleverBonus: 0,
     prijsSchaal: 1,
     vasteLeveringskostenPerMaand: 9.32, // Greenchoice, gaslicht.com
     terugleverkostenAan: true,
@@ -109,7 +110,7 @@ function withTax(s: Scenario, year: 2026 | 2027): Scenario['belasting'] {
 }
 
 /** Dynamisch contract: Tibber-tarieven als referentie (tibber.com/nl, september 2026). */
-export const DYNAMISCH = { opslag: 0.018, terugleverOpslag: 0.018, vasteLeveringskostenPerMaand: 6.99 };
+export const DYNAMISCH = { opslag: 0.018, terugleverOpslag: 0.018, terugleverBonus: 0, vasteLeveringskostenPerMaand: 6.99 };
 
 /**
  * Contract- en regelpakketten. Ze laten je huishouden (zon, verbruik, auto, batterij) ongemoeid.
@@ -162,10 +163,10 @@ export function makePresets(huidig: Scenario['contract']): ContractPreset[] {
           tariefNormaal: GC_KAAL,
           tariefDal: GC_KAAL,
           vasteLeveringskostenPerMaand: 9.32,
-          // Greenchoice rekenvoorbeeld, verwachte waarden 2027 (door Greenchoice zelf als schatting gemarkeerd)
-          terugleververgoeding: 0.05434,
+          // Greenchoice 2027 volgens Energievergelijk.nl (3-10-2026): 8,1 ct vergoeding, 7,9 ct kosten
+          terugleververgoeding: 0.081,
           terugleverkostenAan: true,
-          terugleverkostenPerKwh: 0.05184,
+          terugleverkostenPerKwh: 0.079,
         },
       }),
     },

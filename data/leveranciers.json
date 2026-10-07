@@ -1,0 +1,241 @@
+{
+  "bijgewerkt": "7 oktober 2026",
+  "bronnen": [
+    {
+      "naam": "Energievergelijk: energieprijzen per leverancier",
+      "url": "https://www.energievergelijk.nl/energieprijzen"
+    },
+    {
+      "naam": "Energievergelijk: teruglevering 2027",
+      "url": "https://www.energievergelijk.nl/nieuws/deze-5-energieleveranciers-betalen-in-2027-het-minst-voor-je-zonnestroom"
+    },
+    {
+      "naam": "Energievergelijk: dynamisch zonder terugleverkosten",
+      "url": "https://www.energievergelijk.nl/nieuws/bij-deze-energieleveranciers-betaal-je-geen-terugleverkosten-in-2027"
+    }
+  ],
+  "vasteKostenAanname": 7.5,
+  "opmerkingen": [
+    "Bedragen incl. BTW. Stroomprijs vast = enkeltarief incl. energiebelasting 2026.",
+    "Welkomstkortingen tellen niet mee."
+  ],
+  "contracten": [
+    {
+      "id": "budget-thuis-vast-1j",
+      "leverancier": "Budget Thuis",
+      "type": "vast",
+      "naam": "1 jaar vast",
+      "vasteKostenPerMaand": null,
+      "bron": "Energievergelijk.nl (stroomprijs okt 2026; teruglevering 2027 per 3-10-2026)",
+      "stroomAllIn2026": 0.304,
+      "tlv2027": 0.082,
+      "tlk2027": 0.057
+    },
+    {
+      "id": "coolblue-vast-1j",
+      "leverancier": "Coolblue",
+      "type": "vast",
+      "naam": "1 jaar vast",
+      "vasteKostenPerMaand": null,
+      "bron": "Energievergelijk.nl (stroomprijs okt 2026; teruglevering 2027 per 3-10-2026)",
+      "stroomAllIn2026": 0.316,
+      "tlv2027": 0.088,
+      "tlk2027": 0.082
+    },
+    {
+      "id": "delta-energie-vast-1j",
+      "leverancier": "Delta Energie",
+      "type": "vast",
+      "naam": "1 jaar vast",
+      "vasteKostenPerMaand": null,
+      "bron": "Energievergelijk.nl (stroomprijs okt 2026; teruglevering 2027 per 3-10-2026)",
+      "stroomAllIn2026": 0.303,
+      "tlv2027": 0.08,
+      "tlk2027": 0.077
+    },
+    {
+      "id": "eneco-vast-1j",
+      "leverancier": "Eneco",
+      "type": "vast",
+      "naam": "1 jaar vast",
+      "vasteKostenPerMaand": null,
+      "bron": "Energievergelijk.nl (stroomprijs okt 2026; teruglevering 2027 per 3-10-2026)",
+      "stroomAllIn2026": 0.313,
+      "tlv2027": 0.084,
+      "tlk2027": 0.045
+    },
+    {
+      "id": "energie-vanons-vast-1j",
+      "leverancier": "Energie VanOns",
+      "type": "vast",
+      "naam": "1 jaar vast",
+      "vasteKostenPerMaand": null,
+      "bron": "Energievergelijk.nl (stroomprijs okt 2026; teruglevering 2027 per 3-10-2026)",
+      "stroomAllIn2026": 0.299,
+      "tlv2027": 0.078,
+      "tlk2027": 0.074
+    },
+    {
+      "id": "energiedirect-vast-1j",
+      "leverancier": "Energiedirect",
+      "type": "vast",
+      "naam": "1 jaar vast",
+      "vasteKostenPerMaand": null,
+      "bron": "Energievergelijk.nl (stroomprijs okt 2026; teruglevering 2027 per 3-10-2026)",
+      "stroomAllIn2026": 0.298,
+      "tlv2027": 0.078,
+      "tlk2027": 0.068
+    },
+    {
+      "id": "energiek-vast-1j",
+      "leverancier": "Energiek",
+      "type": "vast",
+      "naam": "1 jaar vast",
+      "vasteKostenPerMaand": null,
+      "bron": "Energievergelijk.nl (stroomprijs okt 2026; teruglevering 2027 per 3-10-2026)",
+      "tlv2027": 0.07,
+      "tlk2027": 0.061,
+      "opmerking": "Stroomprijs onbekend; niet in de ranglijst."
+    },
+    {
+      "id": "engie-vast-1j",
+      "leverancier": "Engie",
+      "type": "vast",
+      "naam": "1 jaar vast",
+      "vasteKostenPerMaand": null,
+      "bron": "Energievergelijk.nl (stroomprijs okt 2026; teruglevering 2027 per 3-10-2026)",
+      "stroomAllIn2026": 0.305,
+      "tlv2027": 0.112,
+      "tlk2027": 0.106
+    },
+    {
+      "id": "essent-vast-1j",
+      "leverancier": "Essent",
+      "type": "vast",
+      "naam": "1 jaar vast",
+      "vasteKostenPerMaand": null,
+      "bron": "Energievergelijk.nl (stroomprijs okt 2026; teruglevering 2027 per 3-10-2026)",
+      "stroomAllIn2026": 0.32,
+      "tlv2027": 0.087,
+      "tlk2027": 0.056
+    },
+    {
+      "id": "gewoon-energie-vast-1j",
+      "leverancier": "Gewoon Energie",
+      "type": "vast",
+      "naam": "1 jaar vast",
+      "vasteKostenPerMaand": null,
+      "bron": "Energievergelijk.nl (stroomprijs okt 2026; teruglevering 2027 per 3-10-2026)",
+      "stroomAllIn2026": 0.304,
+      "opmerking": "Terugleververgoeding/-kosten 2027 onbekend; niet in de ranglijst."
+    },
+    {
+      "id": "greenchoice-vast-1j",
+      "leverancier": "Greenchoice",
+      "type": "vast",
+      "naam": "1 jaar vast",
+      "vasteKostenPerMaand": null,
+      "bron": "Energievergelijk.nl (stroomprijs okt 2026; teruglevering 2027 per 3-10-2026)",
+      "stroomAllIn2026": 0.294,
+      "tlv2027": 0.081,
+      "tlk2027": 0.079
+    },
+    {
+      "id": "innova-energie-vast-1j",
+      "leverancier": "Innova Energie",
+      "type": "vast",
+      "naam": "1 jaar vast",
+      "vasteKostenPerMaand": null,
+      "bron": "Energievergelijk.nl (stroomprijs okt 2026; teruglevering 2027 per 3-10-2026)",
+      "stroomAllIn2026": 0.304,
+      "opmerking": "Terugleververgoeding/-kosten 2027 onbekend; niet in de ranglijst."
+    },
+    {
+      "id": "mega-vast-1j",
+      "leverancier": "Mega",
+      "type": "vast",
+      "naam": "1 jaar vast",
+      "vasteKostenPerMaand": null,
+      "bron": "Energievergelijk.nl (stroomprijs okt 2026; teruglevering 2027 per 3-10-2026)",
+      "stroomAllIn2026": 0.335,
+      "tlv2027": 0.185,
+      "tlk2027": 0.18
+    },
+    {
+      "id": "om-vast-1j",
+      "leverancier": "OM",
+      "type": "vast",
+      "naam": "1 jaar vast",
+      "vasteKostenPerMaand": null,
+      "bron": "Energievergelijk.nl (stroomprijs okt 2026; teruglevering 2027 per 3-10-2026)",
+      "stroomAllIn2026": 0.299,
+      "tlv2027": 0.094,
+      "tlk2027": 0.074
+    },
+    {
+      "id": "oxxio-vast-1j",
+      "leverancier": "Oxxio",
+      "type": "vast",
+      "naam": "1 jaar vast",
+      "vasteKostenPerMaand": null,
+      "bron": "Energievergelijk.nl (stroomprijs okt 2026; teruglevering 2027 per 3-10-2026)",
+      "stroomAllIn2026": 0.299,
+      "opmerking": "Terugleververgoeding/-kosten 2027 onbekend; niet in de ranglijst."
+    },
+    {
+      "id": "powerpeers-vast-1j",
+      "leverancier": "Powerpeers",
+      "type": "vast",
+      "naam": "1 jaar vast",
+      "vasteKostenPerMaand": null,
+      "bron": "Energievergelijk.nl (stroomprijs okt 2026; teruglevering 2027 per 3-10-2026)",
+      "stroomAllIn2026": 0.329,
+      "tlv2027": 0.09,
+      "tlk2027": 0.062
+    },
+    {
+      "id": "pure-energie-vast-1j",
+      "leverancier": "Pure Energie",
+      "type": "vast",
+      "naam": "1 jaar vast",
+      "vasteKostenPerMaand": null,
+      "bron": "Energievergelijk.nl (stroomprijs okt 2026; teruglevering 2027 per 3-10-2026)",
+      "tlv2027": 0.095,
+      "tlk2027": 0.093,
+      "opmerking": "Stroomprijs onbekend; niet in de ranglijst."
+    },
+    {
+      "id": "unitedconsumers-vast-1j",
+      "leverancier": "UnitedConsumers",
+      "type": "vast",
+      "naam": "1 jaar vast",
+      "vasteKostenPerMaand": null,
+      "bron": "Energievergelijk.nl (stroomprijs okt 2026; teruglevering 2027 per 3-10-2026)",
+      "stroomAllIn2026": 0.303,
+      "tlv2027": 0.161,
+      "tlk2027": 0.156
+    },
+    {
+      "id": "vandebron-vast-1j",
+      "leverancier": "Vandebron",
+      "type": "vast",
+      "naam": "1 jaar vast",
+      "vasteKostenPerMaand": null,
+      "bron": "Energievergelijk.nl (stroomprijs okt 2026; teruglevering 2027 per 3-10-2026)",
+      "stroomAllIn2026": 0.3,
+      "tlv2027": 0.078,
+      "tlk2027": 0.075
+    },
+    {
+      "id": "vattenfall-vast-1j",
+      "leverancier": "Vattenfall",
+      "type": "vast",
+      "naam": "1 jaar vast",
+      "vasteKostenPerMaand": null,
+      "bron": "Energievergelijk.nl (stroomprijs okt 2026; teruglevering 2027 per 3-10-2026)",
+      "stroomAllIn2026": 0.314,
+      "tlv2027": 0.084,
+      "tlk2027": 0.049
+    }
+  ]
+}

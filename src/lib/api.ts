@@ -39,6 +39,7 @@ export const api = {
   history: (days: number, res: number) => get<HistoryResponse>(`/api/history?days=${days}&res=${res}`),
   jaarnotas: () => get<JaarnotaSet>('/api/jaarnotas'),
   maanden: () => get<MaandData>('/api/maanden'),
+  leveranciers: () => get<import('../model/suppliers').SupplierData>('/api/leveranciers'),
   pricesToday: () => get<{ prices: Array<{ t: string; price: number }> }>('/api/prices/today'),
 };
 

@@ -34,7 +34,8 @@ export function hourlyPrices(s: Scenario, data: YearData, cal: Calendar) {
     if (c.type === 'dynamisch') {
       const epex = data.epex[i] * c.prijsSchaal;
       importPrice[i] = epex * BTW + c.opslag + eb;
-      exportPrice[i] = epex * (s.regime === 'saldering' ? BTW : 1) - c.terugleverOpslag;
+      const bonus = epex > 0 ? 1 + (c.terugleverBonus ?? 0) : 1;
+      exportPrice[i] = epex * bonus * (s.regime === 'saldering' ? BTW : 1) - c.terugleverOpslag;
     } else {
       importPrice[i] = (isDal(cal, i, s.belasting.dalVanafUur) ? c.tariefDal : c.tariefNormaal) + eb;
       exportPrice[i] = fixedFeedIn;

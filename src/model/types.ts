@@ -31,6 +31,8 @@ export interface Scenario {
     opslag: number;
     /** dynamisch: kosten per teruggeleverde kWh (wordt afgetrokken van de EPEX-prijs) */
     terugleverOpslag: number;
+    /** dynamisch: bonus als fractie van de marktprijs op teruglevering bij een positieve prijs (bv. Zonneplan 10%) */
+    terugleverBonus: number;
     /** schaal op EPEX-prijzen om duurdere/goedkopere jaren te testen (1 = historisch) */
     prijsSchaal: number;
     vasteLeveringskostenPerMaand: number;
