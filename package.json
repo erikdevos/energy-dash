@@ -12,7 +12,8 @@
     "check": "tsx scripts/check-model.ts",
     "lint": "oxlint",
     "preview": "vite preview",
-    "collect": "node --env-file-if-exists=.env server/collect.ts"
+    "collect": "node --env-file-if-exists=.env server/collect.ts",
+    "import-dagen": "tsx scripts/import-dagen.ts"
   },
   "dependencies": {
     "react": "^19.2.8",

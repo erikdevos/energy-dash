@@ -1,24 +1,17 @@
-import { useMemo, useState } from 'react';
-import { CATEGORIES, DEFAULT_APPLIANCES, SHAPE_LABELS, profile, yearlyKwh, type Appliance, type Category } from '../model/appliances';
+import { useEffect, useMemo, useRef, useState } from 'react';
+import { CATEGORIES, SHAPE_KEYS, SHAPE_LABELS, profile, yearlyKwh, type Appliance, type Category } from '../model/appliances';
+import { api } from '../lib/api';
 import { AdaxCard } from './AdaxCard';
+import { DayBalance } from './DayBalance';
 import { WindowEffect } from './WindowEffect';
 import { Card } from './Card';
 import { Segmented } from './controls';
 import { StackedColumns } from './charts/StackedColumns';
 import { fmt } from './charts/scale';
 
-const KEY = 'energy-dash:apparaten:v1';
+/** Aanpassingen uit eerdere versies stonden in de browser; die worden eenmalig overgenomen in het bestand. */
+const OLD_KEY = 'energy-dash:apparaten:v1';
 const HOURS = Array.from({ length: 24 }, (_, h) => String(h));
-
-type Edits = Record<string, { watt?: number; urenPerDag?: number }>;
-
-function loadEdits(): Edits {
-  try {
-    return JSON.parse(localStorage.getItem(KEY) ?? '{}') as Edits;
-  } catch {
-    return {};
-  }
-}
 
 const ZEKER = { goed: 'redelijk zeker', redelijk: 'schatting', ruw: 'ruwe gok' } as const;
 
@@ -27,15 +20,69 @@ interface Props {
   modelKwh: number;
   /** je prijs per kWh van het net, incl. belasting, voor euro-indicaties */
   pricePerKwh: number;
+  /** boiler per maand volgens het model (kWh) en vermogen van de panelen (kWp), voor de dagbalans */
+  boilerMonthly: number[];
+  kwp: number;
 }
 
-export function AppliancesTab({ modelKwh, pricePerKwh }: Props) {
-  const [edits, setEdits] = useState<Edits>(loadEdits);
+export function AppliancesTab({ modelKwh, pricePerKwh, boilerMonthly, kwp }: Props) {
+  const [items, setItems] = useState<Appliance[] | null>(null);
+  const [bron, setBron] = useState<'eigen' | 'voorbeeld'>('voorbeeld');
+  const [saveError, setSaveError] = useState<string | null>(null);
+  const timer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const [season, setSeason] = useState<'winter' | 'zomer'>('winter');
   const [open, setOpen] = useState<string | null>(null);
   const [room, setRoom] = useState<string>('alles');
 
-  const list: Appliance[] = useMemo(() => DEFAULT_APPLIANCES.map((a) => ({ ...a, ...edits[a.id] })), [edits]);
+  const save = (next: Appliance[]) => {
+    if (timer.current) clearTimeout(timer.current);
+    timer.current = setTimeout(() => {
+      api
+        .saveApparaten(next)
+        .then((r) => {
+          setBron(r.bron);
+          setSaveError(null);
+        })
+        .catch((e: unknown) => setSaveError(e instanceof Error ? e.message : String(e)));
+    }, 600);
+  };
+
+  useEffect(() => {
+    api
+      .apparaten()
+      .then((r) => {
+        let list = r.apparaten;
+        try {
+          const old = JSON.parse(localStorage.getItem(OLD_KEY) ?? 'null') as Record<string, { watt?: number; urenPerDag?: number }> | null;
+          if (old) {
+            list = list.map((a) => ({ ...a, ...old[a.id] }));
+            localStorage.removeItem(OLD_KEY);
+            save(list);
+          }
+        } catch {
+          /* geen oude aanpassingen */
+        }
+        setItems(list);
+        setBron(r.bron);
+      })
+      .catch((e: unknown) => setSaveError(e instanceof Error ? e.message : String(e)));
+  }, []);
+
+  const list: Appliance[] = useMemo(() => items ?? [], [items]);
+  const update = (next: Appliance[]) => {
+    setItems(next);
+    save(next);
+  };
+  const edit = (id: string, patch: Partial<Appliance>) => update(list.map((a) => (a.id === id ? { ...a, ...patch } : a)));
+  const add = () => {
+    const a: Appliance = { id: `eigen-${Date.now()}`, naam: 'Nieuw apparaat', ruimte: room === 'alles' ? 'Overal' : room, categorie: 'sluip', watt: 50, urenPerDag: 1, vorm: 'constant', zeker: 'ruw' };
+    update([...list, a]);
+    setOpen(a.id);
+  };
+  const remove = (id: string) => {
+    update(list.filter((a) => a.id !== id));
+    setOpen(null);
+  };
   const rooms = useMemo(() => {
     const m = new Map<string, number>();
     for (const a of list) m.set(a.ruimte, (m.get(a.ruimte) ?? 0) + yearlyKwh(a));
@@ -55,26 +102,19 @@ export function AppliancesTab({ modelKwh, pricePerKwh }: Props) {
   const gap = modelKwh - prof.total;
   const top3 = ranked.slice(0, 3);
 
-  const edit = (id: string, patch: { watt?: number; urenPerDag?: number }) => {
-    const next = { ...edits, [id]: { ...edits[id], ...patch } };
-    setEdits(next);
-    try {
-      localStorage.setItem(KEY, JSON.stringify(next));
-    } catch {
-      /* opslag niet beschikbaar: de aanpassing geldt dan alleen in deze sessie */
-    }
-  };
-  const reset = () => {
-    setEdits({});
-    try {
-      localStorage.removeItem(KEY);
-    } catch {
-      /* zie hierboven */
-    }
-  };
+  if (!items) return saveError ? <p className="error-line span-2">{saveError}</p> : null;
 
   return (
     <>
+      {bron === 'voorbeeld' && (
+        <p className="hint span-2">Je ziet het voorbeeld (data/apparaten.mock.json). Zodra je iets aanpast of toevoegt, maakt het dashboard je eigen lijst aan in data/apparaten.json (privé, niet in git).</p>
+      )}
+      {saveError && <p className="error-line span-2">{saveError}</p>}
+      <datalist id="kamers">
+        {rooms.map(([name]) => (
+          <option key={name} value={name} />
+        ))}
+      </datalist>
       <section className="kpi-row span-2" aria-label="Apparaten samengevat">
         <div className="kpi">
           <span className="kpi-label">{room === 'alles' ? 'Opgetelde apparaten' : room}</span>
@@ -98,6 +138,8 @@ export function AppliancesTab({ modelKwh, pricePerKwh }: Props) {
           <span className="kpi-sub">{fmt.kwh(top3.reduce((s, a) => s + yearlyKwh(a), 0))} samen, {Math.round((top3.reduce((s, a) => s + yearlyKwh(a), 0) / Math.max(1, prof.total)) * 100)}% van het totaal.</span>
         </div>
       </section>
+
+      <DayBalance apparaten={list} boilerMonthly={boilerMonthly} kwp={kwp} />
 
       <AdaxCard />
 
@@ -152,8 +194,8 @@ export function AppliancesTab({ modelKwh, pricePerKwh }: Props) {
         subtitle="Naar schatting per jaar. Klik een regel en pas vermogen of uren aan; de rest van het profiel rekent mee."
         className="span-2"
         actions={
-          <button type="button" className="ghost-btn" onClick={reset} disabled={!Object.keys(edits).length}>
-            Standaardwaarden
+          <button type="button" className="ghost-btn" onClick={add}>
+            Apparaat toevoegen
           </button>
         }
       >
@@ -183,6 +225,14 @@ export function AppliancesTab({ modelKwh, pricePerKwh }: Props) {
                 {open === a.id && (
                   <div className="supplier-detail">
                     <label className="app-field">
+                      <span className="k">Naam</span>
+                      <input type="text" value={a.naam} maxLength={120} onChange={(e) => edit(a.id, { naam: e.target.value })} />
+                    </label>
+                    <label className="app-field">
+                      <span className="k">Kamer</span>
+                      <input type="text" list="kamers" value={a.ruimte} maxLength={60} onChange={(e) => edit(a.id, { ruimte: e.target.value })} />
+                    </label>
+                    <label className="app-field">
                       <span className="k">Vermogen (W)</span>
                       <input type="number" min={0} step={5} value={a.watt} onChange={(e) => edit(a.id, { watt: Math.max(0, Number(e.target.value)) })} />
                     </label>
@@ -190,7 +240,34 @@ export function AppliancesTab({ modelKwh, pricePerKwh }: Props) {
                       <span className="k">Uren per dag{a.winter ? ' (nov t/m mrt)' : ''}</span>
                       <input type="number" min={0} max={24} step={0.1} value={a.urenPerDag} onChange={(e) => edit(a.id, { urenPerDag: Math.min(24, Math.max(0, Number(e.target.value))) })} />
                     </label>
+                    <label className="app-field">
+                      <span className="k">Dagen per jaar (leeg = hele jaar)</span>
+                      <input type="number" min={0} max={366} step={1} value={a.dagen ?? ''} onChange={(e) => edit(a.id, { dagen: e.target.value === '' ? undefined : Math.min(366, Math.max(0, Number(e.target.value))) })} />
+                    </label>
+                    <label className="app-field">
+                      <span className="k">Moment van de dag</span>
+                      <select value={a.vorm} onChange={(e) => edit(a.id, { vorm: e.target.value as Appliance['vorm'] })}>
+                        {SHAPE_KEYS.map((k) => (
+                          <option key={k} value={k}>
+                            {SHAPE_LABELS[k]}
+                          </option>
+                        ))}
+                      </select>
+                    </label>
+                    <label className="app-field">
+                      <span className="k">Soort</span>
+                      <select value={a.categorie} onChange={(e) => edit(a.id, { categorie: e.target.value as Category })}>
+                        {(Object.keys(CATEGORIES) as Category[]).map((k) => (
+                          <option key={k} value={k}>
+                            {CATEGORIES[k].label}
+                          </option>
+                        ))}
+                      </select>
+                    </label>
                     {a.opmerking && <p className="hint">{a.opmerking}</p>}
+                    <button type="button" className="ghost-btn" onClick={() => remove(a.id)}>
+                      Verwijderen
+                    </button>
                   </div>
                 )}
               </div>
@@ -199,7 +276,7 @@ export function AppliancesTab({ modelKwh, pricePerKwh }: Props) {
         </div>
         <p className="hint">
           Vermogens zijn typische waarden en jouw opgave van de gebruiksduur, geen metingen. Een stekkermeter van een paar euro op de
-          handdoekradiator, droger en diepvries geeft de grootste winst in nauwkeurigheid. Aanpassingen blijven in je browser staan.
+          handdoekradiator, droger en diepvries geeft de grootste winst in nauwkeurigheid. Wijzigingen worden opgeslagen in data/apparaten.json (alleen op deze computer, niet in git).
         </p>
       </Card>
     </>

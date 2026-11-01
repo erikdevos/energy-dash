@@ -7,6 +7,7 @@ import { getWeatherYear } from './pvgis.ts';
 import { chargee } from './chargee.ts';
 import { adax } from './adax.ts';
 import { getWeather } from './weather.ts';
+import { readApparaten, saveApparaten } from './apparaten.ts';
 
 const PORT = Number(process.env.API_PORT ?? process.env.PORT ?? 5174);
 // Alleen bereikbaar vanaf deze computer: de API toont je meterdata en nota's. Zet HOST=0.0.0.0 alleen bewust, op een netwerk dat je vertrouwt.
@@ -94,6 +95,27 @@ const server = createServer(async (req, res) => {
         const from = num(q.get('from'), Date.now() - 14 * 86_400_000, 0, Date.now());
         return json(res, 200, (await getWeather(from)) ?? { t: [], tempC: [], rad: [] });
       }
+      case '/api/apparaten': {
+        if (req.method === 'PUT') {
+          // alleen JSON: een andere content-type zou een website in je browser zonder toestemming kunnen sturen
+          if (!(req.headers['content-type'] ?? '').startsWith('application/json')) return json(res, 415, { error: 'alleen application/json' });
+          const chunks: Buffer[] = [];
+          let size = 0;
+          for await (const c of req) {
+            size += (c as Buffer).length;
+            if (size > 512_000) return json(res, 413, { error: 'te groot' });
+            chunks.push(c as Buffer);
+          }
+          try {
+            return json(res, 200, await saveApparaten(JSON.parse(Buffer.concat(chunks).toString('utf8'))));
+          } catch (err) {
+            return json(res, 400, { error: err instanceof Error ? err.message : 'ongeldige invoer' });
+          }
+        }
+        return json(res, 200, await readApparaten());
+      }
+      case '/api/dagen':
+        return json(res, 200, (await readJson(join(DATA_DIR, 'dagen.json'))) ?? { dagen: [] });
       case '/api/leveranciers':
         return json(res, 200, (await readJson(join(DATA_DIR, 'leveranciers.json'))) ?? { contracten: [] });
       case '/api/maanden':

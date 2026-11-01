@@ -1872,3 +1872,16 @@ input[type='range']::-moz-range-thumb {
   padding: 6px 12px;
   font-size: 13px;
 }
+
+.app-field select {
+  padding: 6px 8px;
+  border: 1px solid var(--border, currentColor);
+  border-radius: 8px;
+  background: transparent;
+  color: inherit;
+  font: inherit;
+}
+.app-field input[type='text'] {
+  width: 16rem;
+  max-width: 100%;
+}

@@ -571,6 +571,8 @@ export default function App() {
             <AppliancesTab
               modelKwh={startpunt.verbruik.basisKwh + startpunt.verbruik.flexKwh}
               pricePerKwh={pricePerKwh ?? 0.33}
+              boilerMonthly={reference?.components.boiler ?? []}
+              kwp={(startpunt.zon.panelen * startpunt.zon.wpPerPaneel) / 1000}
             />
           )}
 

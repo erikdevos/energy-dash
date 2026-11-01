@@ -41,6 +41,13 @@ export const api = {
   maanden: () => get<MaandData>('/api/maanden'),
   leveranciers: () => get<import('../model/suppliers').SupplierData>('/api/leveranciers'),
   weatherHourly: (from: number) => get<HourlyWeather>(`/api/weather?from=${from}`),
+  dagen: () => get<{ dagen: DagMeting[] }>('/api/dagen'),
+  apparaten: () => get<ApparatenData>('/api/apparaten'),
+  saveApparaten: async (apparaten: import('../model/appliances').Appliance[]) => {
+    const res = await fetch('/api/apparaten', { method: 'PUT', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ apparaten }) });
+    if (!res.ok) throw new Error(`apparaten opslaan: ${res.status}`);
+    return (await res.json()) as ApparatenData;
+  },
   adax: () => get<AdaxData>('/api/adax'),
   pricesToday: () => get<{ prices: Array<{ t: string; price: number }> }>('/api/prices/today'),
 };
@@ -185,4 +192,19 @@ export interface HourlyWeather {
   t: number[];
   tempC: number[];
   rad: number[];
+}
+
+/** De apparatenlijst: eigen bestand (data/apparaten.json) of het voorbeeld. */
+export interface ApparatenData {
+  bron: 'eigen' | 'voorbeeld';
+  apparaten: import('../model/appliances').Appliance[];
+}
+
+/** Verbruik per dag volgens Greenchoice (kWh, afgerond op hele kWh). */
+export interface DagMeting {
+  datum: string;
+  afnameNormaal: number;
+  afnameDal: number;
+  terugNormaal: number;
+  terugDal: number;
 }

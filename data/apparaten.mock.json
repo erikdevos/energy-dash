@@ -1,0 +1,106 @@
+{
+ "apparaten": [
+  {
+   "id": "tv",
+   "naam": "Televisie",
+   "ruimte": "Woonkamer",
+   "categorie": "media",
+   "watt": 100,
+   "urenPerDag": 4,
+   "vorm": "avond",
+   "zeker": "ruw"
+  },
+  {
+   "id": "lamp-woon",
+   "naam": "Ledverlichting woonkamer",
+   "ruimte": "Woonkamer",
+   "categorie": "verlichting",
+   "watt": 30,
+   "urenPerDag": 5,
+   "vorm": "avond",
+   "zeker": "ruw"
+  },
+  {
+   "id": "inductie",
+   "naam": "Inductiekookplaat",
+   "ruimte": "Keuken",
+   "categorie": "koken",
+   "watt": 1200,
+   "urenPerDag": 1,
+   "vorm": "koken",
+   "zeker": "ruw"
+  },
+  {
+   "id": "oven",
+   "naam": "Elektrische oven",
+   "ruimte": "Keuken",
+   "categorie": "koken",
+   "watt": 1500,
+   "urenPerDag": 0.4,
+   "vorm": "koken",
+   "zeker": "ruw"
+  },
+  {
+   "id": "vaatwasser",
+   "naam": "Vaatwasser",
+   "ruimte": "Keuken",
+   "categorie": "was",
+   "watt": 900,
+   "urenPerDag": 1,
+   "vorm": "wasdag",
+   "zeker": "ruw"
+  },
+  {
+   "id": "koelkast",
+   "naam": "Koelkast",
+   "ruimte": "Keuken",
+   "categorie": "koelen",
+   "watt": 20,
+   "urenPerDag": 24,
+   "vorm": "constant",
+   "zeker": "ruw"
+  },
+  {
+   "id": "wasmachine",
+   "naam": "Wasmachine",
+   "ruimte": "Wasruimte",
+   "categorie": "was",
+   "watt": 500,
+   "urenPerDag": 1.4,
+   "vorm": "wasdag",
+   "zeker": "ruw"
+  },
+  {
+   "id": "droger",
+   "naam": "Warmtepompdroger",
+   "ruimte": "Wasruimte",
+   "categorie": "was",
+   "watt": 800,
+   "urenPerDag": 2,
+   "vorm": "wasdag",
+   "winter": true,
+   "zeker": "ruw",
+   "opmerking": "Voorbeeld: alleen in de koude maanden."
+  },
+  {
+   "id": "wifi",
+   "naam": "Router en wifi",
+   "ruimte": "Overal",
+   "categorie": "sluip",
+   "watt": 10,
+   "urenPerDag": 24,
+   "vorm": "constant",
+   "zeker": "ruw"
+  },
+  {
+   "id": "sluip",
+   "naam": "Overige standby",
+   "ruimte": "Overal",
+   "categorie": "sluip",
+   "watt": 25,
+   "urenPerDag": 24,
+   "vorm": "constant",
+   "zeker": "ruw"
+  }
+ ]
+}

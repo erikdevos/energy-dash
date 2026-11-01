@@ -14,9 +14,9 @@ export async function readJson<T>(path: string): Promise<T | null> {
   }
 }
 
-export async function writeJson(path: string, value: unknown): Promise<void> {
+export async function writeJson(path: string, value: unknown, pretty = false): Promise<void> {
   await mkdir(dirname(path), { recursive: true });
-  await writeFile(path, JSON.stringify(value));
+  await writeFile(path, pretty ? JSON.stringify(value, null, 1) : JSON.stringify(value));
 }
 
 /** Haalt een waarde uit de schijfcache, of berekent en bewaart hem. */
