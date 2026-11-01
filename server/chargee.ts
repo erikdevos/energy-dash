@@ -3,6 +3,7 @@ import { unlinkSync } from 'node:fs';
 import { open, readFile, unlink } from 'node:fs/promises';
 import { join } from 'node:path';
 import { DATA_DIR } from './cache.ts';
+import { MinuteStore } from './minutestore.ts';
 import { aggregate, P1Store, type Bucket, type Meter } from './p1store.ts';
 
 /*
@@ -234,6 +235,7 @@ function mockReading(): Omit<Reading, 'today'> {
  * alleen mee: live waarden haalt het direct bij de Sparky, de historie uit de bestanden.
  */
 const store = new P1Store(STORE_DIR);
+const minutes = new MinuteStore(STORE_DIR);
 let collecting = false;
 let latest: Omit<Reading, 'today'> | null = null;
 let latestAt = 0;
@@ -302,7 +304,10 @@ async function poll() {
     latest = r;
     latestAt = Date.now();
     lastError = undefined;
-    if (collecting) await store.add(Date.parse(r.ts), r.meter, r.importW, r.exportW);
+    if (collecting) {
+      await store.add(Date.parse(r.ts), r.meter, r.importW, r.exportW);
+      minutes.add({ ts: Date.parse(r.ts), importW: r.importW, exportW: r.exportW, phases: r.phases, meter: r.meter });
+    }
   } catch (err) {
     lastError = err instanceof Error ? err.message : String(err);
   }
@@ -345,7 +350,10 @@ async function tryBecomeCollector(): Promise<boolean> {
   await poll();
   setInterval(poll, POLL_MS);
   setInterval(() => void store.saveState(), 60_000);
-  process.on('exit', () => void store.saveState());
+  process.on('exit', () => {
+    void store.saveState();
+    minutes.flush();
+  });
   await store.saveState();
   return true;
 }

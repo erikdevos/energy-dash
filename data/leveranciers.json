@@ -269,9 +269,9 @@
       "opslag": 0.02,
       "terugleverOpslag": -0.02,
       "terugleverBonus": 0.1,
-      "vasteKostenPerMaand": null,
-      "bron": "Energievergelijk, okt 2026; opslag en vergoedingen uit eerdere leveranciersgegevens",
-      "opmerking": "Inkoopvergoeding 2 ct per kWh bij teruglevering plus 10% zonnebonus op de marktprijs."
+      "vasteKostenPerMaand": 6.25,
+      "bron": "Zonneplan, persoonlijk aanbod met prijsopbouw (nov 2026)",
+      "opmerking": "Teruglevering: marktprijs plus 2 ct inkoopvergoeding, daarover 10% Zonnebonus (alleen overdag, zolang dat bedrag positief is, voor maximaal 7.500 kWh per jaar en alleen voor stroom die je netto teruglevert, niet uit de thuisbatterij). Inkoopvergoeding 2 ct per kWh op afname. Vaste leveringskosten 75 euro per jaar. Geen terugleverkosten. Opzeggen dagelijks en gratis. De energiebelastingteruggave in 2027 is in hun aanbod maar enkele euro's per jaar, dus verwaarloosbaar. Hun aanbod rekent met een hoger prijsniveau op zonuren dan de beurs van 2025."
     },
     {
       "id": "frank",

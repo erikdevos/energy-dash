@@ -50,6 +50,8 @@ De Sparky bewaart zelf geen historie, dus we meten zelf. Elke 10 seconden wordt 
 - het piekvermogen;
 - de meterstanden.
 
+Daarnaast komt er per minuut en per fase een regel bij in `data/p1/minuut/JJJJ-MM-DD.jsonl`, bedoeld om apparaten te herkennen aan hun vermogen en tijdstip: gemiddelde afname en teruglevering per fase (L1 tot L3), de gemiddelde spanning, de hoogste piek en de meterstanden aan het eind van de minuut. De volgorde van de velden staat bovenaan `server/minutestore.ts`. Dit is ongeveer 130 kB per dag.
+
 Er wordt niets weggegooid. Lag de meting stil, dan legt de eerste nieuwe meting het hele gat vast als één regel (`gap: true`): de kWh kloppen dan nog steeds, alleen niet per kwartier.
 
 Meten gebeurt alleen zolang er een proces draait. Dat kan op twee manieren:

@@ -1,9 +1,11 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import type { SupplierData, SupplierRow } from '../model/suppliers';
 import { Card } from './Card';
 import { Segmented } from './controls';
 import { fmt } from './charts/scale';
 import { MonthlyBill } from './MonthlyBill';
+import { OfferCard } from './OfferCard';
+import { api, type Aanbieding } from '../lib/api';
 import type { YearData } from '../model/types';
 
 interface Props {
@@ -25,6 +27,13 @@ export function SuppliersTab({ data, nowRows, planRows, plansActive, current, pr
   const [household, setHousehold] = useState<'nu' | 'plannen'>(plansActive ? 'plannen' : 'nu');
   const [filter, setFilter] = useState<Filter>('alles');
   const [open, setOpen] = useState<string | null>(null);
+  const [offers, setOffers] = useState<Aanbieding[]>([]);
+  useEffect(() => {
+    api
+      .aanbiedingen()
+      .then((r) => setOffers(r.aanbiedingen))
+      .catch(() => setOffers([]));
+  }, []);
   const all = household === 'plannen' ? planRows : nowRows;
   const rows = all.filter((r) => filter === 'alles' || r.contract.type === filter);
   const best = rows[0];
@@ -160,6 +169,10 @@ export function SuppliersTab({ data, nowRows, planRows, plansActive, current, pr
           ))}
         </p>
       </Card>
+
+      {offers.map((o) => (
+        <OfferCard key={o.id} offer={o} rows={all} year={year} />
+      ))}
 
       <MonthlyBill rows={all} year={year} current={current} termijnbedrag={termijnbedrag} />
     </>

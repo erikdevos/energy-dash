@@ -116,6 +116,8 @@ const server = createServer(async (req, res) => {
       }
       case '/api/dagen':
         return json(res, 200, (await readJson(join(DATA_DIR, 'dagen.json'))) ?? { dagen: [] });
+      case '/api/aanbiedingen':
+        return json(res, 200, (await readJson(join(DATA_DIR, 'aanbiedingen.json'))) ?? { aanbiedingen: [] });
       case '/api/leveranciers':
         return json(res, 200, (await readJson(join(DATA_DIR, 'leveranciers.json'))) ?? { contracten: [] });
       case '/api/maanden':

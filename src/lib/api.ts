@@ -42,6 +42,7 @@ export const api = {
   leveranciers: () => get<import('../model/suppliers').SupplierData>('/api/leveranciers'),
   weatherHourly: (from: number) => get<HourlyWeather>(`/api/weather?from=${from}`),
   dagen: () => get<{ dagen: DagMeting[] }>('/api/dagen'),
+  aanbiedingen: () => get<{ aanbiedingen: Aanbieding[] }>('/api/aanbiedingen'),
   apparaten: () => get<ApparatenData>('/api/apparaten'),
   saveApparaten: async (apparaten: import('../model/appliances').Appliance[]) => {
     const res = await fetch('/api/apparaten', { method: 'PUT', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ apparaten }) });
@@ -207,4 +208,22 @@ export interface DagMeting {
   afnameDal: number;
   terugNormaal: number;
   terugDal: number;
+}
+
+/** Een persoonlijk aanbod van een leverancier, met de prijsopbouw zoals die erin staat (€ per jaar). */
+export interface Aanbieding {
+  id: string;
+  leverancier: string;
+  /** id van het contract in leveranciers.json waarmee we vergelijken */
+  contractId: string;
+  datum: string;
+  bron: string;
+  afnameKwh: number;
+  terugKwh: number;
+  regels: Record<'verbruik' | 'energiebelasting' | 'inkoopvergoeding' | 'vasteKosten' | 'netbeheer' | 'verminderingEB' | 'terugleververgoeding' | 'ebTeruggave' | 'zonnebonus', number>;
+  jaarkosten: number;
+  perMaand: number;
+  perMaandSlim?: number;
+  voorwaarden: string[];
+  opmerking?: string;
 }

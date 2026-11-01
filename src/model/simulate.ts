@@ -34,8 +34,9 @@ export function hourlyPrices(s: Scenario, data: YearData, cal: Calendar) {
     if (c.type === 'dynamisch') {
       const epex = data.epex[i] * c.prijsSchaal;
       importPrice[i] = epex * BTW + c.opslag + eb;
-      const bonus = epex > 0 ? 1 + (c.terugleverBonus ?? 0) : 1;
-      exportPrice[i] = epex * bonus * (s.regime === 'saldering' ? BTW : 1) - c.terugleverOpslag;
+      // Teruglevering: marktprijs min een eventuele opslag; een bonus (Zonneplan: 10%) telt over dat bedrag zolang het positief is.
+      const base = epex * (s.regime === 'saldering' ? BTW : 1) - c.terugleverOpslag;
+      exportPrice[i] = base > 0 ? base * (1 + (c.terugleverBonus ?? 0)) : base;
     } else {
       importPrice[i] = (isDal(cal, i, s.belasting.dalVanafUur) ? c.tariefDal : c.tariefNormaal) + eb;
       exportPrice[i] = fixedFeedIn;
