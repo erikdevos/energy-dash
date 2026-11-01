@@ -1,10 +1,14 @@
 /*
  * Losse collector: leest de Sparky uit en slaat kwartierwaarden op in data/p1/, zonder dashboard.
+ * Haalt ook elke 6 uur het verbruik per radiator op bij Adax (data/adax/), als ADAX_CLIENT_ID is ingevuld.
  * Bedoeld om altijd op de achtergrond te draaien (bijv. via launchd of op een Raspberry Pi).
  * Verzamelt het dashboard al, dan wacht deze collector en neemt hij het over zodra dat stopt.
  * Start: npm run collect
  */
 import { chargee } from './chargee.ts';
+import { adax } from './adax.ts';
+
+adax.start();
 
 await chargee.startCollector();
 console.log(

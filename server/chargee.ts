@@ -137,7 +137,7 @@ async function fetchSparky(): Promise<Omit<Reading, 'today'>> {
   ]);
   if (!data.ok) throw new Error(`Sparky antwoordde ${data.status}`);
   const tg = telegram?.ok ? parseTelegramPower(await telegram.text()) : undefined;
-  return toReading((await data.json()) as SparkyData, `Chargee Sparky (${HOST})`, tg);
+  return toReading((await data.json()) as SparkyData, 'Chargee Sparky', tg);
 }
 
 // ---------- mock ----------

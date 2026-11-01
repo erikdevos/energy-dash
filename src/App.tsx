@@ -9,6 +9,9 @@ import { buildInsights } from './model/insights';
 import { PLAN_ORDER, planOn, roadTo2027, setPlan, type PlanId } from './model/overview';
 import { Overview, type Tab } from './components/overview/Overview';
 import { PricesToday } from './components/PricesToday';
+import { GoalTab } from './components/GoalTab';
+import { computeGoal } from './model/goal';
+import { AppliancesTab } from './components/AppliancesTab';
 import { SuppliersTab } from './components/SuppliersTab';
 import { rankSuppliers, type SupplierData } from './model/suppliers';
 import { projectSettlement } from './model/settlement';
@@ -28,6 +31,7 @@ import { Summary, type Investment } from './components/Summary';
 import { fmt } from './components/charts/scale';
 
 const STORAGE_KEY = 'energy-dash:v6';
+const PELLET_MIGRATION = 'energy-dash:pellet-v2';
 
 interface Stored {
   scenario: Scenario;
@@ -50,7 +54,14 @@ function withDefaults(s: Scenario): Scenario {
     contract: { ...b.contract, ...s.contract },
     belasting: { ...b.belasting, ...s.belasting },
     zon: { ...b.zon, ...s.zon },
-    verbruik: { ...b.verbruik, ...s.verbruik },
+    // de oude standaard (18/14 °C) is vervangen door de gemeten gewoonte (19,5/17,5 °C)
+    verbruik: {
+      ...b.verbruik,
+      ...s.verbruik,
+      ...(s.verbruik?.thermostaatDag === 18 && s.verbruik?.thermostaatNacht === 14
+        ? { thermostaatDag: b.verbruik.thermostaatDag, thermostaatNacht: b.verbruik.thermostaatNacht }
+        : {}),
+    },
     ev: { ...b.ev, ...s.ev },
     batterij: { ...b.batterij, ...s.batterij },
   };
@@ -59,6 +70,14 @@ function withDefaults(s: Scenario): Scenario {
 function loadStored(): Partial<Stored> {
   try {
     const st = JSON.parse(localStorage.getItem(STORAGE_KEY) ?? '{}') as Partial<Stored>;
+    // eenmalig: de pelletkachel brandt op koude dagen van 8 tot 23 uur, ook op werkdagen (was een aanname van alleen 's ochtends en 's avonds)
+    if (!localStorage.getItem(PELLET_MIGRATION)) {
+      localStorage.setItem(PELLET_MIGRATION, '1');
+      const fix = (s?: Scenario) => s && (s.verbruik.pellet.overdagWerkdagen = true);
+      fix(st.scenario);
+      fix(st.startpunt);
+      st.saved?.forEach((x) => fix(x.scenario));
+    }
     if (st.scenario) st.scenario = withDefaults(st.scenario);
     if (st.startpunt) st.startpunt = withDefaults(st.startpunt);
     st.saved = st.saved?.map((x) => ({ ...x, scenario: withDefaults(x.scenario) }));
@@ -115,10 +134,12 @@ export default function App() {
   const [contract2027, setContract2027] = useState<'dyn2027' | 'vast2027'>(stored.contract2027 ?? 'dyn2027');
   const TABS: Array<{ id: Tab; label: string }> = [
     { id: 'overzicht', label: 'Overzicht' },
+    { id: 'doel', label: 'Doel 2027' },
     { id: 'nu', label: 'Nu' },
     { id: 'verbruik', label: 'Verbruik' },
     { id: 'scenarios', label: "Scenario's" },
     { id: 'leveranciers', label: 'Leveranciers' },
+    { id: 'apparaten', label: 'Apparaten' },
     { id: 'gegevens', label: 'Gegevens' },
   ];
   const [tab, setTabState] = useState<Tab>(() => {
@@ -128,7 +149,7 @@ export default function App() {
   useEffect(() => {
     const onHash = () => {
       const h = window.location.hash.slice(1) as Tab;
-      if (['overzicht', 'nu', 'verbruik', 'scenarios', 'leveranciers', 'gegevens'].includes(h)) setTabState(h);
+      if (['overzicht', 'doel', 'nu', 'verbruik', 'scenarios', 'leveranciers', 'apparaten', 'gegevens'].includes(h)) setTabState(h);
     };
     window.addEventListener('hashchange', onHash);
     return () => window.removeEventListener('hashchange', onHash);
@@ -342,6 +363,13 @@ export default function App() {
   const pricePerKwh = startpunt
     ? 0.6 * startpunt.contract.tariefDal + 0.4 * startpunt.contract.tariefNormaal + startpunt.belasting.energiebelasting
     : 0.33;
+  const goalData = useMemo(() => {
+    if (tab !== 'doel' || !startpunt || !data || !presetMap.nu || !presetMap.vast2027 || !presetMap.dyn2027) return null;
+    return {
+      goal: computeGoal(startpunt, { nu: presetMap.nu, vast2027: presetMap.vast2027, dyn2027: presetMap.dyn2027 }, data),
+      planned: applyMyPlans(startpunt, startpunt),
+    };
+  }, [tab, startpunt, data, presetMap]);
   const road = useMemo(
     () => (deferred && startpunt && data && presetMap.nu ? roadTo2027(deferred, startpunt, presetMap.nu, presetMap[contract2027], data) : null),
     [deferred, startpunt, data, presetMap, contract2027],
@@ -459,6 +487,10 @@ export default function App() {
             />
           )}
 
+          {tab === 'doel' && goalData && startpunt && data && presetMap.dyn2027 && (
+            <GoalTab goal={goalData.goal} start={startpunt} planned={goalData.planned} dyn2027={presetMap.dyn2027} data={data} termijnbedrag={termijnbedrag ?? 0} />
+          )}
+
           {tab === 'nu' && (
             <>
               <LivePanel live={live} sinceNota={sinceNota} />
@@ -528,10 +560,19 @@ export default function App() {
                 plansActive={Object.values(plansOn).some(Boolean)}
                 current={notas?.leverancier ?? 'Greenchoice'}
                 priceYear={data.priceYear}
+                year={data}
+                termijnbedrag={termijnbedrag ?? 0}
               />
             ) : (
               <p className="hint">Geen leveranciersgegevens gevonden (data/leveranciers.json).</p>
             ))}
+
+          {tab === 'apparaten' && (
+            <AppliancesTab
+              modelKwh={startpunt.verbruik.basisKwh + startpunt.verbruik.flexKwh}
+              pricePerKwh={pricePerKwh ?? 0.33}
+            />
+          )}
 
           {tab === 'gegevens' && (
             <>

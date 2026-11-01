@@ -3,13 +3,14 @@ import { readFileSync } from 'node:fs';
 import { calibrate, calibrationTargets, startFromNotas } from '../src/model/calibrate';
 import { kwp } from '../src/model/simulate';
 import type { JaarnotaSet } from '../src/lib/api';
+import { LOC } from './locatie';
 
 const set: JaarnotaSet = JSON.parse(readFileSync('data/jaarnotas.json', 'utf8'));
 const prices = JSON.parse(readFileSync('data/cache/prices-2025.json', 'utf8'));
 for (const target of calibrationTargets(set)) {
   for (const orientation of ['zuid', 'oost-west']) {
     for (const angle of [10, 15]) {
-      const w = JSON.parse(readFileSync(`data/cache/pvgis-2023-50.86-5.87-${angle}-${orientation}.json`, 'utf8'));
+      const w = JSON.parse(readFileSync(`data/cache/pvgis-2023-${LOC}-${angle}-${orientation}.json`, 'utf8'));
       const data = { priceYear: 2025, epex: prices.prices, weatherYear: 2023, pvPerKwp: w.pvPerKwp, tempC: w.tempC };
       const pvgis = w.pvPerKwp.reduce((a: number, b: number) => a + b, 0);
       const start = startFromNotas(set, target, data);

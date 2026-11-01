@@ -68,13 +68,13 @@ export const MEASURES: Measure[] = [
 ];
 
 /**
- * Jouw plannen (najaar 2026): Perfera 3,5 kW neemt de centrale ruimte over (nu de Adax van 2000 W,
- * de grootste stookpost), nieuwe kozijnen en garagedeur (jouw verwachting: 40-50% minder stoken),
+ * Jouw plannen (najaar 2026): Perfera 3,5 kW neemt grotendeels de Adax-radiatoren over (75% van de warmte;
+ * de grootste stookpost is nu de Adax van 2000 W in de centrale ruimte), nieuwe kozijnen en garagedeur (jouw verwachting: 40-50% minder stoken),
  * apparaten overdag.
  */
 export function applyMyPlans(s: Scenario, start: Scenario): Scenario {
   return withVerbruik(s, {
-    aircoAandeel: Math.max(start.verbruik.aircoAandeel, 0.6),
+    aircoAandeel: Math.max(start.verbruik.aircoAandeel, 0.75),
     aircoScop: 4.5,
     aircoVermogenKw: 4.0,
     isolatieBesparing: Math.max(start.verbruik.isolatieBesparing, 0.45),

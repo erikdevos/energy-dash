@@ -1796,3 +1796,79 @@ input[type='range']::-moz-range-thumb {
     display: none;
   }
 }
+
+.app-field {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+.app-field input {
+  width: 8rem;
+  padding: 6px 8px;
+  border: 1px solid var(--border, currentColor);
+  border-radius: 8px;
+  background: transparent;
+  color: inherit;
+  font: inherit;
+}
+
+.termijn-line {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px 12px;
+  margin: 12px 0;
+}
+
+.pellet-days {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin: 12px 0;
+}
+.pellet-days .chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+.chip.on {
+  background: var(--accent);
+  border-color: var(--accent);
+  color: #fff;
+}
+
+.wf-toggle {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  cursor: pointer;
+}
+.wf-toggle input {
+  width: 16px;
+  height: 16px;
+  accent-color: var(--accent);
+}
+.wf-row.off .wf-label,
+.wf-row.off .wf-value {
+  opacity: 0.55;
+}
+
+.termijn-planner {
+  margin-top: 20px;
+  padding-top: 16px;
+  border-top: 1px solid var(--border);
+}
+.termijn-planner h3 {
+  margin: 0 0 6px;
+  font-size: 15px;
+}
+
+.room-filter {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+.room-filter .chip {
+  padding: 6px 12px;
+  font-size: 13px;
+}

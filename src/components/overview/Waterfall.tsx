@@ -28,17 +28,26 @@ export function Waterfall({ steps }: { steps: Step[] }) {
         const value =
           r.kind === 'total'
             ? `${fmt.eur(r.value)} per jaar`
-            : `${r.value > 0 ? '+' : '−'} ${fmt.eur(Math.abs(r.value)).replace('€ ', '€ ')}`;
+            : r.toggle && !r.toggle.on
+              ? 'niet gedaan'
+              : `${r.value > 0 ? '+' : '−'} ${fmt.eur(Math.abs(r.value)).replace('€ ', '€ ')}`;
         return (
           <div
             key={i}
-            className={`wf-row ${cls} ${hover === i ? 'hover' : ''}`}
+            className={`wf-row ${cls} ${hover === i ? 'hover' : ''} ${r.toggle && !r.toggle.on ? 'off' : ''}`}
             role="row"
             onPointerEnter={() => setHover(i)}
             onPointerLeave={() => setHover(null)}
           >
             <div className="wf-label" role="rowheader">
-              <span>{r.label}</span>
+              {r.toggle ? (
+                <label className="wf-toggle">
+                  <input type="checkbox" checked={r.toggle.on} onChange={(e) => r.toggle!.onChange(e.target.checked)} />
+                  <span>{r.label}</span>
+                </label>
+              ) : (
+                <span>{r.label}</span>
+              )}
               {r.detail && <span className="wf-detail">{r.detail}</span>}
             </div>
             <div className="wf-track" role="cell" aria-hidden="true">

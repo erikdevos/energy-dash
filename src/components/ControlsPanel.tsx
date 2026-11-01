@@ -324,7 +324,7 @@ export function ControlsPanel(p: Props) {
           display={kwh}
           reference={r.verbruik.verwarmingKwh}
           onChange={upd('verbruik', 'verwarmingKwh')}
-          hint="Met elektrische radiatoren is dit ook je stroomverbruik (1 op 1). Volgt de uurtemperatuur, met thermostaat 20 °C overdag en 16 °C 's nachts."
+          hint="Met elektrische radiatoren is dit ook je stroomverbruik (1 op 1). Volgt de uurtemperatuur en de thermostaatstand hieronder."
         />
         <Slider
           label="Thermostaat radiatoren overdag"
@@ -335,7 +335,7 @@ export function ControlsPanel(p: Props) {
           display={(v) => `${fmt.one(v)} °C`}
           reference={r.verbruik.thermostaatDag}
           onChange={upd('verbruik', 'thermostaatDag')}
-          hint="7-23 uur. Nu 18 °C: daaronder springen de radiatoren aan."
+          hint="7-23 uur. Nu ruim 19 °C: daaronder springen de radiatoren aan (vrijstaande bungalow, ze slaan snel aan)."
         />
         <Slider
           label="Thermostaat radiatoren 's nachts"
@@ -346,7 +346,7 @@ export function ControlsPanel(p: Props) {
           display={(v) => `${fmt.one(v)} °C`}
           reference={r.verbruik.thermostaatNacht}
           onChange={upd('verbruik', 'thermostaatNacht')}
-          hint="Nu lager gezet: het huis zakt 's nachts naar 12-14 °C."
+          hint="Radiatoren staan ook 's nachts vaak aan zodra het afkoelt, rond 17 tot 18 °C."
         />
         <Slider
           label="Minder warmtevraag (kozijnen, isolatie)"
@@ -416,7 +416,7 @@ export function ControlsPanel(p: Props) {
               onChange={(overdagWerkdagen) =>
                 onChange((prev) => ({ ...prev, verbruik: { ...prev.verbruik, pellet: { ...prev.verbruik.pellet, overdagWerkdagen } } }))
               }
-              hint="Uit: werkdagen alleen 7-9 uur en 16-22 uur, weekend 8-22 uur."
+              hint="Aan: elke koude dag van 8 tot 23 uur. Uit: werkdagen alleen 7-9 en 16-23 uur."
             />
             <Slider
               label="Aan als het buiten kouder is dan"

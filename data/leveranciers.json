@@ -1,5 +1,5 @@
 {
-  "bijgewerkt": "7 oktober 2026",
+  "bijgewerkt": "1 november 2026",
   "bronnen": [
     {
       "naam": "Energievergelijk: energieprijzen per leverancier",
@@ -236,6 +236,54 @@
       "stroomAllIn2026": 0.314,
       "tlv2027": 0.084,
       "tlk2027": 0.049
+    },
+    {
+      "id": "tibber",
+      "leverancier": "Tibber",
+      "type": "dynamisch",
+      "naam": "Dynamisch",
+      "opslag": 0.018,
+      "terugleverOpslag": 0.018,
+      "terugleverBonus": 0,
+      "vasteKostenPerMaand": 6.99,
+      "bron": "Energievergelijk, okt 2026; opslag en vergoedingen uit eerdere leveranciersgegevens",
+      "opmerking": "Opslag en verkoopvergoeding 1,8 ct; vaste kosten 6,99 per maand."
+    },
+    {
+      "id": "anwb-dyn",
+      "leverancier": "ANWB Energie",
+      "type": "dynamisch",
+      "naam": "Dynamisch",
+      "opslag": 0.018,
+      "terugleverOpslag": 0,
+      "terugleverBonus": 0,
+      "vasteKostenPerMaand": null,
+      "bron": "Energievergelijk, okt 2026; opslag en vergoedingen uit eerdere leveranciersgegevens",
+      "opmerking": "Teruglevering tegen kale marktprijs."
+    },
+    {
+      "id": "zonneplan",
+      "leverancier": "Zonneplan",
+      "type": "dynamisch",
+      "naam": "Dynamisch",
+      "opslag": 0.02,
+      "terugleverOpslag": -0.02,
+      "terugleverBonus": 0.1,
+      "vasteKostenPerMaand": null,
+      "bron": "Energievergelijk, okt 2026; opslag en vergoedingen uit eerdere leveranciersgegevens",
+      "opmerking": "Inkoopvergoeding 2 ct per kWh bij teruglevering plus 10% zonnebonus op de marktprijs."
+    },
+    {
+      "id": "frank",
+      "leverancier": "Frank Energie",
+      "type": "dynamisch",
+      "naam": "Dynamisch",
+      "opslag": 0.022,
+      "terugleverOpslag": -0.0182,
+      "terugleverBonus": 0,
+      "vasteKostenPerMaand": null,
+      "bron": "Energievergelijk, okt 2026; opslag en vergoedingen uit eerdere leveranciersgegevens",
+      "opmerking": "Inkoop circa 1,8 ct excl. btw; terugleververgoeding +1,82 ct. Excl/incl btw niet eenduidig, indicatief."
     }
   ]
 }

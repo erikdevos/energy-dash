@@ -18,7 +18,7 @@ export const PLAN_LABELS: Record<PlanId, string> = {
 };
 
 /** Standaardwaarden als je een plan aanzet en het nog niet was ingesteld. */
-const PLAN_DEFAULTS = { aircoAandeel: 0.6, aircoScop: 4.5, aircoVermogenKw: 4.0, isolatieBesparing: 0.45, flexNaarZon: 0.7 };
+const PLAN_DEFAULTS = { aircoAandeel: 0.75, aircoScop: 4.5, aircoVermogenKw: 4.0, isolatieBesparing: 0.45, flexNaarZon: 0.7 };
 
 export function planOn(s: Scenario, start: Scenario, id: PlanId): boolean {
   const v = s.verbruik;
@@ -59,6 +59,8 @@ export interface Step {
   /** totaal (stand) of verandering t.o.v. de vorige stand, € per jaar */
   value: number;
   kind: 'total' | 'delta';
+  /** maak van de rij een schakelaar: zet de maatregel aan of uit */
+  toggle?: { on: boolean; onChange: (on: boolean) => void };
 }
 
 export const PLAN_ORDER: PlanId[] = ['kozijnen', 'airco', 'overdag', 'batterij'];

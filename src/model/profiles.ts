@@ -61,18 +61,30 @@ export function flexProfile(cal: Calendar, annualKwh: number, shareToSun: number
 
 /*
  * Verwarming. De elektrische radiatoren hebben een thermostaat: overdag (7-23 uur) springen ze aan onder
- * 18 °C, 's nachts staan ze lager (het huis zakt dan naar 12-14 °C). Zon, mensen en apparaten leveren
+ * 19,5 °C en 's nachts onder 17,5 °C (vrijstaande bungalow: ze slaan snel aan en staan bij kou bijna 24 uur). Zon, mensen en apparaten leveren
  * gratis zo'n 3 °C. De woning reageert traag: we rekenen met het gemiddelde van de laatste 6 uur buiten.
  *
  * De warmtevraag is afgestemd op je huidige thermostaatgedrag (REFERENTIE). Zet je de thermostaat anders,
  * dan schaalt de vraag mee met de graaduren: een graad hoger kost dus echt meer.
  */
-export const THERMOSTAAT_REFERENTIE = { dag: 18, nacht: 14 };
-const FREE_GAINS = 3;
+export const THERMOSTAAT_REFERENTIE = { dag: 19.5, nacht: 17.5 };
+/** gratis warmte uit mensen en apparaten (°C), dag en nacht */
+const FREE_GAINS = 1.5;
+/**
+ * Extra gratis warmte door zon door de ramen (°C per kWh/kWp per uur zonopbrengst). De woonkamer staat op het zuiden:
+ * op een zonnige dag werkt de zon van ca. 9 tot 18 uur het huis gratis op, op een donkere dag moet er direct gestookt worden.
+ * De zonopbrengst van de panelen dient als maat voor de instraling, gemiddeld over 2 uur omdat de woning traag reageert.
+ */
+const SOLAR_GAIN = 25;
+/** aandeel van de zonnewarmte dat direct werkt; de rest wordt opgeslagen in muren en vloer */
+const DIRECT_SHARE = 0.4;
+/** per uur blijft dit deel van de opgeslagen warmte over (tijdconstante ca. 8 uur) */
+const STORAGE_DECAY = Math.exp(-1 / 8);
 
-function rawDemand(cal: Calendar, tempC: ArrayLike<number>, dag: number, nacht: number): Float64Array {
+function rawDemand(cal: Calendar, tempC: ArrayLike<number>, dag: number, nacht: number, pv?: ArrayLike<number>): Float64Array {
   const out = new Float64Array(HOURS);
   let sum = 0;
+  let stored = 0;
   const win = 6;
   for (let i = 0; i < HOURS; i++) {
     sum += tempC[i];
@@ -80,7 +92,10 @@ function rawDemand(cal: Calendar, tempC: ArrayLike<number>, dag: number, nacht: 
     const avg = sum / Math.min(i + 1, win);
     const h = cal.hour[i];
     const setpoint = h >= 7 && h < 23 ? dag : nacht;
-    out[i] = Math.max(0, setpoint - FREE_GAINS - avg);
+    // direct zonlicht, plus warmte die de woning opslaat en 's avonds en 's nachts weer afgeeft
+    if (pv) stored = stored * STORAGE_DECAY + (pv[i] ?? 0) * (1 - STORAGE_DECAY);
+    const sun = pv ? DIRECT_SHARE * (((pv[i] ?? 0) + (pv[i - 1] ?? 0)) / 2) + (1 - DIRECT_SHARE) * stored : 0;
+    out[i] = Math.max(0, setpoint - FREE_GAINS - SOLAR_GAIN * sun - avg);
   }
   return out;
 }
@@ -94,12 +109,13 @@ export function heatDemandProfile(
   tempC: ArrayLike<number>,
   annualKwh: number,
   thermostaat: { dag: number; nacht: number } = THERMOSTAAT_REFERENTIE,
+  pv?: ArrayLike<number>,
 ): Float64Array {
-  const ref = rawDemand(cal, tempC, THERMOSTAAT_REFERENTIE.dag, THERMOSTAAT_REFERENTIE.nacht);
+  const ref = rawDemand(cal, tempC, THERMOSTAAT_REFERENTIE.dag, THERMOSTAAT_REFERENTIE.nacht, pv);
   let refSum = 0;
   for (let i = 0; i < HOURS; i++) refSum += ref[i];
   const same = thermostaat.dag === THERMOSTAAT_REFERENTIE.dag && thermostaat.nacht === THERMOSTAAT_REFERENTIE.nacht;
-  const out = same ? ref : rawDemand(cal, tempC, thermostaat.dag, thermostaat.nacht);
+  const out = same ? ref : rawDemand(cal, tempC, thermostaat.dag, thermostaat.nacht, pv);
   const f = refSum > 0 ? annualKwh / refSum : 0;
   for (let i = 0; i < HOURS; i++) out[i] *= f;
   return out;
@@ -116,7 +132,7 @@ export interface PelletSettings {
 }
 
 /**
- * Pelletkachel: brandt op koude dagen als jullie thuis zijn (weekend 8-22 uur, werkdagen 7-9 en 16-22 uur),
+ * Pelletkachel: brandt op koude dagen van 8 tot 23 uur (met 'overdag ook op werkdagen' uit: werkdagen 7-9 en 16-23 uur),
  * nooit 's nachts. Zolang hij brandt, neemt hij (een deel van) de warmtevraag over van de radiatoren.
  */
 export function pelletProfile(cal: Calendar, tempC: ArrayLike<number>, demand: Float64Array, pellet: PelletSettings): Float64Array {
@@ -135,7 +151,7 @@ export function pelletProfile(cal: Calendar, tempC: ArrayLike<number>, demand: F
     if (mean[cal.day[i]] >= pellet.onderTemp) continue;
     const h = cal.hour[i];
     const weekend = cal.dow[i] === 0 || cal.dow[i] === 6;
-    const home = weekend || pellet.overdagWerkdagen ? h >= 8 && h < 22 : (h >= 7 && h < 9) || (h >= 16 && h < 22);
+    const home = weekend || pellet.overdagWerkdagen ? h >= 8 && h < 23 : (h >= 7 && h < 9) || (h >= 16 && h < 23);
     if (home) out[i] = demand[i] * pellet.aandeel;
   }
   return out;

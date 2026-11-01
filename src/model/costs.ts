@@ -172,3 +172,29 @@ export function selfConsumption(t: Totals): number {
 export function selfSufficiency(t: Totals, rendement: number): number {
   return t.load > 0 ? Math.min(1, (t.pvDirect + t.batPvCharge * rendement) / t.load) : 0;
 }
+
+/**
+ * Kosten per kalendermaand (€, negatief = je krijgt geld terug) voor een jaar zonder saldering.
+ * Variabele kosten (stroom, energiebelasting, teruglevering, terugleverkosten) volgen het uur waarin ze vallen;
+ * vaste leveringskosten, netbeheer en vermindering energiebelasting worden gelijk over de maanden verdeeld.
+ * Met saldering valt een maandbedrag niet eerlijk toe te rekenen, daarom geeft die functie dan null.
+ */
+export function monthlyCosts(s: Scenario, outcome: Outcome, data: YearData): number[] | null {
+  if (s.regime === 'saldering') return null;
+  const c = s.contract;
+  const eb = s.belasting.energiebelasting;
+  const cal = calendarFor(data.priceYear);
+  const sim = outcome.sim;
+  const months = Array<number>(12).fill(0);
+  for (let i = 0; i < HOURS; i++) {
+    const price =
+      c.type === 'vast'
+        ? isDal(cal, i, s.belasting.dalVanafUur)
+          ? c.tariefDal
+          : c.tariefNormaal
+        : data.epex[i] * c.prijsSchaal * BTW + c.opslag;
+    months[cal.month[i]] += sim.imp[i] * (price + eb) - sim.exp[i] * sim.exportPrice[i] + (c.terugleverkostenAan ? sim.exp[i] * c.terugleverkostenPerKwh : 0);
+  }
+  const fixed = (c.vasteLeveringskostenPerMaand * 12 + s.belasting.netbeheerPerJaar - s.belasting.vermindering) / 12;
+  return months.map((m) => m + fixed);
+}

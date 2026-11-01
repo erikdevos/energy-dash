@@ -70,9 +70,9 @@ export const BASE_SCENARIO: Scenario = {
     aircoScop: 4.5, // Daikin Perfera FTXM35R: SCOP 5,0 volgens Daikin; in de praktijk iets lager
     aircoVermogenKw: 4.0, // Perfera 3,5 kW (koelen) levert 4,0 kW verwarming
     // Pelletkachel op dagen onder 10 °C als jullie thuis zijn; radiatoren staan dan uit. Prijs is een aanname.
-    pellet: { aan: true, onderTemp: 10, aandeel: 1, overdagWerkdagen: false, prijsPerKg: 0.4 },
-    thermostaatDag: 18,
-    thermostaatNacht: 14,
+    pellet: { aan: true, onderTemp: 10, aandeel: 1, overdagWerkdagen: true, prijsPerKg: 0.4 },
+    thermostaatDag: 19.5,
+    thermostaatNacht: 17.5,
     koelenKwh: 0,
     aircoPrijs: 3000, // aanname, indicatief incl. installatie
     warmwaterKwh: 2600, // aanname: oude boiler 80 L / 2,5 kW, 5 personen, wordt geschaald op de jaarnota's

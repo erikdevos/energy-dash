@@ -5,7 +5,7 @@
   "type": "module",
   "scripts": {
     "dev": "concurrently -k -n api,web -c blue,green \"npm:dev:api\" \"npm:dev:web\"",
-    "dev:api": "node --watch --env-file-if-exists=.env server/index.ts",
+    "dev:api": "API_PORT=5174 node --watch --env-file-if-exists=.env server/index.ts",
     "dev:web": "vite",
     "build": "tsc -b && vite build",
     "start": "npm run build && node --env-file-if-exists=.env server/index.ts",

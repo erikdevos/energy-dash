@@ -3,6 +3,7 @@ import { readFileSync } from 'node:fs';
 import { calibrationTargets, startFromNotas } from '../src/model/calibrate';
 import { run } from '../src/model/costs';
 import type { JaarnotaSet } from '../src/lib/api';
+import { LOC } from './locatie';
 
 const EUR = {
   stroom: [269.46, 160.95, 128.15, 73.02, 86.55, 64.83, 49.5, 56.23, 81.93, 14.92],
@@ -18,7 +19,7 @@ const exp = EUR.terug.map((e) => e / pExp);
 
 const set: JaarnotaSet = JSON.parse(readFileSync('data/jaarnotas.json', 'utf8'));
 const prices = JSON.parse(readFileSync('data/cache/prices-2025.json', 'utf8'));
-const w = JSON.parse(readFileSync('data/cache/pvgis-2023-50.86-5.87-10-oost-west.json', 'utf8'));
+const w = JSON.parse(readFileSync(`data/cache/pvgis-2023-${LOC}-10-oost-west.json`, 'utf8'));
 const data = { priceYear: 2025, epex: prices.prices, weatherYear: 2023, pvPerKwp: w.pvPerKwp, tempC: w.tempC };
 const start = startFromNotas(set, calibrationTargets(set).find((t) => t.id === '2025-2026')!, data);
 const o = run(start, data);

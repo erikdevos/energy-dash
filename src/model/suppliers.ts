@@ -39,6 +39,8 @@ export interface SupplierData {
 
 export interface SupplierRow {
   contract: SupplierContract;
+  /** het scenario waarmee dit contract is doorgerekend */
+  scenario: Scenario;
   outcome: Outcome;
   total: number;
   /** stroom + energiebelasting */
@@ -95,10 +97,12 @@ export function rankSuppliers(s: Scenario, data: SupplierData, year: YearData): 
   );
   return usable
     .map((c) => {
-      const outcome = run(applySupplier(s, c, data.vasteKostenAanname), year);
+      const scenario = applySupplier(s, c, data.vasteKostenAanname);
+      const outcome = run(scenario, year);
       const line = (k: string) => outcome.costs.find((l) => l.key === k)?.eur ?? 0;
       return {
         contract: c,
+        scenario,
         outcome,
         total: outcome.total,
         stroom: line('levering') + line('eb'),

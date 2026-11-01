@@ -6,6 +6,7 @@ import { run } from '../src/model/costs';
 import { kwp } from '../src/model/simulate';
 import type { Scenario } from '../src/model/types';
 import type { JaarnotaSet } from '../src/lib/api';
+import { LOC } from './locatie';
 
 const set: JaarnotaSet = JSON.parse(readFileSync('data/jaarnotas.json', 'utf8'));
 const maanden = JSON.parse(readFileSync('data/maanden.json', 'utf8')).maanden.filter((m: { maand: string }) => m.maand.startsWith('2025'));
@@ -38,7 +39,7 @@ for (const a of (process.argv[2] ?? '10,20,25,30,35').split(',').map(Number)) co
 const results = [];
 for (const [orientation, angle] of combos) {
   for (const year of [2019, 2020, 2021, 2022, 2023]) {
-    const w = JSON.parse(readFileSync(`data/cache/pvgis-${year}-50.86-5.87-${angle}-${orientation}.json`, 'utf8'));
+    const w = JSON.parse(readFileSync(`data/cache/pvgis-${year}-${LOC}-${angle}-${orientation}.json`, 'utf8'));
     const data = { priceYear: 2025, epex: prices.prices, weatherYear: year, pvPerKwp: w.pvPerKwp, tempC: w.tempC };
     const t = calibrationTargets(set).find((x) => x.id === '2025-2026')!;
     let s = startFromNotas(set, t, data);

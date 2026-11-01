@@ -3,6 +3,8 @@ import type { SupplierData, SupplierRow } from '../model/suppliers';
 import { Card } from './Card';
 import { Segmented } from './controls';
 import { fmt } from './charts/scale';
+import { MonthlyBill } from './MonthlyBill';
+import type { YearData } from '../model/types';
 
 interface Props {
   data: SupplierData;
@@ -13,11 +15,13 @@ interface Props {
   /** je huidige leverancier, om te markeren */
   current: string;
   priceYear: number;
+  year: YearData;
+  termijnbedrag: number;
 }
 
 type Filter = 'alles' | 'vast' | 'dynamisch';
 
-export function SuppliersTab({ data, nowRows, planRows, plansActive, current, priceYear }: Props) {
+export function SuppliersTab({ data, nowRows, planRows, plansActive, current, priceYear, year, termijnbedrag }: Props) {
   const [household, setHousehold] = useState<'nu' | 'plannen'>(plansActive ? 'plannen' : 'nu');
   const [filter, setFilter] = useState<Filter>('alles');
   const [open, setOpen] = useState<string | null>(null);
@@ -156,6 +160,8 @@ export function SuppliersTab({ data, nowRows, planRows, plansActive, current, pr
           ))}
         </p>
       </Card>
+
+      <MonthlyBill rows={all} year={year} current={current} termijnbedrag={termijnbedrag} />
     </>
   );
 }

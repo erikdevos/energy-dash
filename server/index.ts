@@ -5,8 +5,13 @@ import { DATA_DIR, ROOT, readJson } from './cache.ts';
 import { getPricesToday, getPriceYear } from './prices.ts';
 import { getWeatherYear } from './pvgis.ts';
 import { chargee } from './chargee.ts';
+import { adax } from './adax.ts';
+import { getWeather } from './weather.ts';
 
-const PORT = Number(process.env.PORT ?? 5174);
+const PORT = Number(process.env.API_PORT ?? process.env.PORT ?? 5174);
+// Alleen bereikbaar vanaf deze computer: de API toont je meterdata en nota's. Zet HOST=0.0.0.0 alleen bewust, op een netwerk dat je vertrouwt.
+const HOST = process.env.HOST ?? '127.0.0.1';
+const LOCAL_HOSTS = new Set(['localhost', '127.0.0.1', '[::1]']);
 const DIST = join(ROOT, 'dist');
 
 function json(res: ServerResponse, status: number, body: unknown) {
@@ -17,6 +22,13 @@ function json(res: ServerResponse, status: number, body: unknown) {
 function num(v: string | null, fallback: number, min: number, max: number): number {
   const n = v === null ? fallback : Number(v);
   return Number.isFinite(n) ? Math.min(max, Math.max(min, n)) : fallback;
+}
+
+/** Alleen 'zuid', 'oost-west' of een hoek in graden; de waarde komt in een bestandsnaam terecht. */
+function orientation(v: string | null): string {
+  if (v === 'oost-west') return v;
+  const deg = Number(v);
+  return v !== null && v !== 'zuid' && Number.isFinite(deg) && deg >= -180 && deg <= 180 ? String(deg) : 'zuid';
 }
 
 const MIME: Record<string, string> = {
@@ -46,6 +58,9 @@ async function serveStatic(path: string, res: ServerResponse) {
 }
 
 const server = createServer(async (req, res) => {
+  // tegen DNS-rebinding: een website mag via je browser niet bij je meterdata komen door een vreemde hostnaam naar dit adres te laten wijzen
+  const hostName = (req.headers.host ?? '').replace(/:\d+$/, '');
+  if (HOST === '127.0.0.1' && !LOCAL_HOSTS.has(hostName)) return json(res, 403, { error: 'alleen via localhost' });
   const url = new URL(req.url ?? '/', 'http://localhost');
   const q = url.searchParams;
   try {
@@ -61,7 +76,7 @@ const server = createServer(async (req, res) => {
           lat: num(q.get('lat'), 52.09, 50.7, 53.6),
           lon: num(q.get('lon'), 5.12, 3.3, 7.3),
           angle: num(q.get('angle'), 35, 0, 90),
-          orientation: q.get('orientation') ?? 'zuid',
+          orientation: orientation(q.get('orientation')),
           year: num(q.get('year'), 2023, 2005, 2023),
         });
         return json(res, 200, weather);
@@ -72,6 +87,12 @@ const server = createServer(async (req, res) => {
         // res in minuten: 15 (kwartier), 60 (uur) of 1440 (dag)
         const resMin = [15, 60, 1440].includes(Number(q.get('res'))) ? Number(q.get('res')) : 60;
         return json(res, 200, await chargee.history(num(q.get('days'), 2, 1, 800), resMin));
+      }
+      case '/api/adax':
+        return json(res, 200, await adax.read());
+      case '/api/weather': {
+        const from = num(q.get('from'), Date.now() - 14 * 86_400_000, 0, Date.now());
+        return json(res, 200, (await getWeather(from)) ?? { t: [], tempC: [], rad: [] });
       }
       case '/api/leveranciers':
         return json(res, 200, (await readJson(join(DATA_DIR, 'leveranciers.json'))) ?? { contracten: [] });
@@ -101,8 +122,10 @@ server.on('error', (err: NodeJS.ErrnoException) => {
   throw err;
 });
 
-server.listen(PORT, () => {
+server.listen(PORT, HOST, () => {
   console.log(`energy-dash API op http://localhost:${PORT} (Chargee: ${chargee.describe()})`);
+  adax.start();
+  if (adax.configured()) console.log('Adax: verbruik per radiator wordt opgehaald en bewaard in data/adax/.');
   void chargee.startCollector().then(() => {
     console.log(chargee.collecting ? 'Meterdata wordt opgeslagen in data/p1/.' : 'Losse collector actief: dashboard leest mee.');
   });

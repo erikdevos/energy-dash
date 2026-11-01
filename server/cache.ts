@@ -21,6 +21,7 @@ export async function writeJson(path: string, value: unknown): Promise<void> {
 
 /** Haalt een waarde uit de schijfcache, of berekent en bewaart hem. */
 export async function cached<T>(name: string, produce: () => Promise<T>): Promise<T> {
+  if (!/^[\w.-]+$/.test(name) || name.includes('..')) throw new Error('ongeldige cachenaam');
   const path = join(CACHE_DIR, name);
   const hit = await readJson<T>(path);
   if (hit !== null) return hit;

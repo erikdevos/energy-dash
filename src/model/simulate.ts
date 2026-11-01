@@ -82,7 +82,7 @@ export function householdLoad(s: Scenario, data: YearData, cal: Calendar): House
   const key = JSON.stringify(v);
   if (loadCache && loadCache.key === key && loadCache.data === data) return loadCache.value;
   // Warmtevraag van het huis; wat de pelletkachel levert hoeft niet elektrisch.
-  const demand = heatDemandProfile(cal, data.tempC, v.verwarmingKwh * (1 - v.isolatieBesparing), { dag: v.thermostaatDag, nacht: v.thermostaatNacht });
+  const demand = heatDemandProfile(cal, data.tempC, v.verwarmingKwh * (1 - v.isolatieBesparing), { dag: v.thermostaatDag, nacht: v.thermostaatNacht }, data.pvPerKwp);
   const pelletHeat = pelletProfile(cal, data.tempC, demand, v.pellet);
   const electricDemand = new Float64Array(HOURS);
   for (let i = 0; i < HOURS; i++) electricDemand[i] = demand[i] - pelletHeat[i];

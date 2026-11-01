@@ -54,7 +54,7 @@ Er wordt niets weggegooid. Lag de meting stil, dan legt de eerste nieuwe meting 
 
 Meten gebeurt alleen zolang er een proces draait. Dat kan op twee manieren:
 - **Het dashboard zelf:** `npm run dev`.
-- **De losse collector:** `npm run collect`. Hiervoor hoeft het dashboard niet open.
+- **De losse collector:** `npm run collect`. Hiervoor hoeft het dashboard niet open. Hij haalt ook het Adax-verbruik op als je dat hebt ingesteld.
 
 Er verzamelt altijd maar één proces tegelijk. De andere leest mee en neemt het over zodra het eerste stopt.
 

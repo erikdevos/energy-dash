@@ -40,6 +40,8 @@ export const api = {
   jaarnotas: () => get<JaarnotaSet>('/api/jaarnotas'),
   maanden: () => get<MaandData>('/api/maanden'),
   leveranciers: () => get<import('../model/suppliers').SupplierData>('/api/leveranciers'),
+  weatherHourly: (from: number) => get<HourlyWeather>(`/api/weather?from=${from}`),
+  adax: () => get<AdaxData>('/api/adax'),
   pricesToday: () => get<{ prices: Array<{ t: string; price: number }> }>('/api/prices/today'),
 };
 
@@ -168,4 +170,19 @@ export interface JaarnotaSet {
 export interface MaandData {
   bron?: string;
   maanden: Array<{ maand: string; afname: number; teruglevering: number; deel?: boolean }>;
+}
+
+/** Verbruik per Adax-radiator (ruimte), per dag in Wh. */
+export interface AdaxData {
+  configured: boolean;
+  lastSync: string | null;
+  error: string | null;
+  rooms: Array<{ id: string; naam: string; uren: Array<[number, number]> }>;
+}
+
+/** Uurweer: temperatuur (°C) en zonnestraling (W/m²). */
+export interface HourlyWeather {
+  t: number[];
+  tempC: number[];
+  rad: number[];
 }
