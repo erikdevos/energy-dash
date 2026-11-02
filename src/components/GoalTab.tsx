@@ -127,7 +127,7 @@ export function GoalTab({ goal, start, planned, dyn2027, data, termijnbedrag }: 
         <div className="supplier-list" role="list">
           {goal.steps.map((s) => (
             <div key={s.lever.id} role="listitem" className="supplier">
-              <div className="supplier-row">
+              <div className="supplier-row battery-row duo-row">
                 <span className="supplier-name">
                   <strong>{s.lever.label}</strong>
                   <Rich as="span" className="supplier-sub">
@@ -181,7 +181,7 @@ export function GoalTab({ goal, start, planned, dyn2027, data, termijnbedrag }: 
             const years = saving > 0 ? price / saving : Infinity;
             return (
               <div key={r.kwh} role="listitem" className="supplier">
-                <div className="supplier-row">
+                <div className="supplier-row battery-row">
                   <span className="supplier-name">
                     <strong>{r.kwh} kWh</strong>
                     <Rich as="span" className="supplier-sub">{fmt.eur(price)} aanschaf</Rich>
@@ -236,7 +236,7 @@ export function GoalTab({ goal, start, planned, dyn2027, data, termijnbedrag }: 
             const years = saving > 0 ? price / saving : Infinity;
             return (
               <div key={n} role="listitem" className="supplier">
-                <div className="supplier-row">
+                <div className="supplier-row battery-row">
                   <span className="supplier-name">
                     <strong>{n} {n === 1 ? 'module' : 'modules'}</strong>
                     <Rich as="span" className="supplier-sub">{fmt.kwh(r.kwh)}, {r.kw.toFixed(1).replace('.', ',')} kW, {fmt.eur(price)} aanschaf</Rich>

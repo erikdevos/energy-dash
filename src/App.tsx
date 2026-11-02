@@ -30,6 +30,7 @@ import { SettlementCard } from './components/SettlementCard';
 import { Summary, type Investment } from './components/Summary';
 import { fmt } from './components/charts/scale';
 import { Rich } from './components/Rich';
+import { ThemeToggle } from './components/ThemeToggle';
 
 const STORAGE_KEY = 'energy-dash:v6';
 const PELLET_MIGRATION = 'energy-dash:pellet-v2';
@@ -600,6 +601,9 @@ export default function App() {
           )}
         </main>
       </div>
+      <footer className="app-footer">
+        <ThemeToggle />
+      </footer>
     </div>
   );
 }

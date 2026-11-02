@@ -18,6 +18,12 @@ export interface ApparatenResponse {
 const str = (v: unknown, max = 400): string | null => (typeof v === 'string' && v.length <= max ? v : null);
 const num = (v: unknown, min: number, max: number): number | null => (typeof v === 'number' && Number.isFinite(v) && v >= min && v <= max ? v : null);
 
+/** Een enkele fase (oudere bestanden) of een lijst; dubbele en onbekende waarden vallen weg. */
+function fases(v: unknown): Array<'L1' | 'L2' | 'L3'> {
+  const list = Array.isArray(v) ? v : [v];
+  return (['L1', 'L2', 'L3'] as const).filter((f) => list.includes(f));
+}
+
 function clean(raw: unknown): Appliance | null {
   const r = raw as Record<string, unknown> | null;
   if (!r || typeof r !== 'object') return null;
@@ -43,6 +49,7 @@ function clean(raw: unknown): Appliance | null {
     ...(r.winter === true ? { winter: true } : {}),
     ...(r.zomer === true ? { zomer: true } : {}),
     ...(dagen !== undefined ? { dagen } : {}),
+    ...(fases(r.fase).length > 0 ? { fase: fases(r.fase) } : {}),
     zeker,
     ...(str(r.opmerking, 2000) ? { opmerking: str(r.opmerking, 2000)! } : {}),
   };

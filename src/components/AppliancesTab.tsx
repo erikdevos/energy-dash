@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
-import { CATEGORIES, SHAPE_KEYS, SHAPE_LABELS, profile, yearlyKwh, type Appliance, type Category } from '../model/appliances';
+import { CATEGORIES, FASEN, SHAPE_KEYS, SHAPE_LABELS, profile, yearlyKwh, type Appliance, type Category, type Fase } from '../model/appliances';
 import { api } from '../lib/api';
 import { AdaxCard } from './AdaxCard';
 import { DayBalance } from './DayBalance';
@@ -198,6 +198,42 @@ export function AppliancesTab({ modelKwh, pricePerKwh, boilerMonthly, kwp }: Pro
       </Card>
 
       <Card
+        title="Per fase van de meter"
+        subtitle="Je aansluiting heeft drie fases (L1, L2, L3), elk met een eigen stroomgroep. Hier zie je welke apparaten op welke fase hangen."
+        className="span-2"
+      >
+        <div className="phase-grid">
+          {([...FASEN, undefined] as Array<Fase | undefined>).map((f) => {
+            const items = list.filter((a) => (f ? a.fase?.includes(f) : !a.fase?.length));
+            // een apparaat over meerdere fases telt voor een gelijk deel mee op elke fase (aanname)
+            const kwh = items.reduce((sum, a) => sum + yearlyKwh(a) / (a.fase?.length || 1), 0);
+            const top = [...items].sort((x, y) => yearlyKwh(y) - yearlyKwh(x)).slice(0, 4);
+            return (
+              <div key={f ?? 'onbekend'} className="phase-box">
+                <span className="kpi-label">{f ?? 'Nog niet bekend'}</span>
+                <span className="phase-count">{items.length} {items.length === 1 ? 'apparaat' : 'apparaten'}</span>
+                <Rich as="span" className="kpi-sub">{fmt.kwh(kwh)} per jaar in deze lijst</Rich>
+                {top.length > 0 && (
+                  <ul className="top-list">
+                    {top.map((a) => (
+                      <li key={a.id}>
+                        <span className="top-name">{a.naam.split(' (')[0]}</span>
+                      </li>
+                    ))}
+                  </ul>
+                )}
+              </div>
+            );
+          })}
+        </div>
+        <Rich as="p" className="hint">
+          De fases komen uit metingen van de meter: wat aan of uit ging en op welke fase het vermogen veranderde. Niet in deze lijst staan de
+          boiler en de verwarming, die hebben hun eigen model. Open een apparaat en vink de fase aan als je die weet; een zwaar apparaat zoals een inductieplaat kan over meerdere fases verdeeld zijn en telt dan evenredig mee. Je kunt het ook invullen
+          op basis van de groepenkast.
+        </Rich>
+      </Card>
+
+      <Card
         title={room === 'alles' ? 'Wat kost elk apparaat' : `Apparaten in: ${room}`}
         subtitle="Naar schatting per jaar. Klik een regel en pas vermogen of uren aan; de rest van het profiel rekent mee."
         className="span-2"
@@ -218,7 +254,7 @@ export function AppliancesTab({ modelKwh, pricePerKwh, boilerMonthly, kwp }: Pro
                   <span className="supplier-name">
                     <strong>{a.naam}</strong>
                     <Rich as="span" className="supplier-sub">
-                      {a.ruimte} · {cat.label} · {SHAPE_LABELS[a.vorm]}
+                      {a.ruimte} · {cat.label} · {SHAPE_LABELS[a.vorm]}{a.fase?.length ? ` · ${a.fase.join(' en ')}` : ''}
                     </Rich>
                   </span>
                   <span className="supplier-track" aria-hidden="true">
@@ -240,6 +276,24 @@ export function AppliancesTab({ modelKwh, pricePerKwh, boilerMonthly, kwp }: Pro
                       <span className="k">Kamer</span>
                       <input type="text" list="kamers" value={a.ruimte} maxLength={60} onChange={(e) => edit(a.id, { ruimte: e.target.value })} />
                     </label>
+                    <fieldset className="app-field fase-field">
+                      <legend className="k">Fase op de meter</legend>
+                      <span className="fase-options">
+                        {FASEN.map((f) => (
+                          <label key={f}>
+                            <input
+                              type="checkbox"
+                              checked={a.fase?.includes(f) ?? false}
+                              onChange={(e) => {
+                                const next = FASEN.filter((x) => (x === f ? e.target.checked : a.fase?.includes(x)));
+                                edit(a.id, { fase: next.length > 0 ? next : undefined });
+                              }}
+                            />
+                            {f}
+                          </label>
+                        ))}
+                      </span>
+                    </fieldset>
                     <label className="app-field">
                       <span className="k">Vermogen (W)</span>
                       <input type="number" min={0} step={5} value={a.watt} onChange={(e) => edit(a.id, { watt: Math.max(0, Number(e.target.value)) })} />

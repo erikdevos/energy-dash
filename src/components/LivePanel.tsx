@@ -10,6 +10,15 @@ import { Rich } from './Rich';
 
 const kw = (w: number) => `${fmt.one(w / 1000)} kW`;
 
+/** Periode van de meetgrafiek: aantal dagen terug en vakgrootte in minuten (15 = kwartier, 60 = uur, 1440 = dag). */
+const RANGES = {
+  '6u': { days: 0.25, res: 15, tick: 4, label: 'per kwartier' },
+  '24u': { days: 1, res: 15, tick: 16, label: 'per kwartier' },
+  '48u': { days: 2, res: 60, tick: 6, label: 'per uur' },
+  '30d': { days: 30, res: 1440, tick: 5, label: 'per dag' },
+} as const;
+type Range = keyof typeof RANGES;
+
 interface Props {
   live: { data: LiveReading | null; error: string | null };
   /** eindstanden van de laatste jaarnota, om het lopende notajaar te tonen */
@@ -20,17 +29,18 @@ interface Props {
 }
 
 export function LivePanel({ live, sinceNota }: Props) {
-  const [range, setRange] = useState<'48u' | '30d'>('48u');
-  const fetchHistory = useCallback(() => (range === '48u' ? api.history(2, 60) : api.history(30, 1440)), [range]);
+  const [range, setRange] = useState<Range>('48u');
+  const { days, res } = RANGES[range];
+  const fetchHistory = useCallback(() => api.history(days, res), [days, res]);
   const hist = usePoll<HistoryResponse>(fetchHistory, 60_000);
   const r = live.data;
   const net = r ? r.importW - r.exportW : 0;
-  const buckets = hist.data?.res === (range === '48u' ? 60 : 1440) ? hist.data.buckets : [];
-  const daily = range === '30d';
+  const buckets = hist.data?.res === res ? hist.data.buckets : [];
+  const daily = res === 1440;
   const labels = buckets.map((h) =>
     daily
       ? new Date(h.t).toLocaleDateString('nl-NL', { day: 'numeric', timeZone: 'Europe/Amsterdam' })
-      : new Date(h.t).toLocaleTimeString('nl-NL', { hour: '2-digit', timeZone: 'Europe/Amsterdam' }),
+      : new Date(h.t).toLocaleTimeString('nl-NL', { hour: '2-digit', ...(res < 60 ? { minute: '2-digit' } : {}), timeZone: 'Europe/Amsterdam' }),
   );
   const titles = buckets.map(
     (h) =>
@@ -142,10 +152,12 @@ export function LivePanel({ live, sinceNota }: Props) {
         </div>
       </div>
       <div className="history-head">
-        <h3 className="mini-title">Gemeten {daily ? 'per dag' : 'per uur'}</h3>
+        <h3 className="mini-title">Gemeten {RANGES[range].label}</h3>
         <Segmented
           value={range}
           options={[
+            { value: '6u', label: '6 uur' },
+            { value: '24u', label: '24 uur' },
             { value: '48u', label: '48 uur' },
             { value: '30d', label: '30 dagen' },
           ]}
@@ -154,14 +166,14 @@ export function LivePanel({ live, sinceNota }: Props) {
       </div>
       {buckets.length > 0 ? (
         <StackedColumns
-          ariaLabel={`Gemeten afname en teruglevering ${daily ? 'per dag' : 'per uur'}`}
+          ariaLabel={`Gemeten afname en teruglevering ${RANGES[range].label}`}
           categories={labels}
           categoryTitles={titles}
           up={[FLOW_SERIES.imp]}
           down={[FLOW_SERIES.exp]}
           values={{ imp: buckets.map((h) => h.imp), exp: buckets.map((h) => h.exp) }}
           format={(v) => `${fmt.one(v)} kWh`}
-          tickEvery={daily ? 5 : 6}
+          tickEvery={RANGES[range].tick}
           height={170}
           extraRows={(i) => {
             const b = buckets[i];

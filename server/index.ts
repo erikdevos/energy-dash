@@ -87,7 +87,7 @@ const server = createServer(async (req, res) => {
       case '/api/history': {
         // res in minuten: 15 (kwartier), 60 (uur) of 1440 (dag)
         const resMin = [15, 60, 1440].includes(Number(q.get('res'))) ? Number(q.get('res')) : 60;
-        return json(res, 200, await chargee.history(num(q.get('days'), 2, 1, 800), resMin));
+        return json(res, 200, await chargee.history(num(q.get('days'), 2, 0.04, 800), resMin));
       }
       case '/api/adax':
         return json(res, 200, await adax.read());

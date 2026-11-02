@@ -9,6 +9,9 @@
 
 export type Category = 'koken' | 'koelen' | 'was' | 'media' | 'verlichting' | 'sluip' | 'comfort';
 
+export type Fase = 'L1' | 'L2' | 'L3';
+export const FASEN: Fase[] = ['L1', 'L2', 'L3'];
+
 export type Shape = 'constant' | 'avond' | 'koken' | 'wasdag' | 'ochtendavond' | 'dag' | 'middag' | 'nacht';
 
 export interface Appliance {
@@ -28,6 +31,8 @@ export interface Appliance {
   zomer?: boolean;
   /** aantal dagen per jaar waarop het apparaat draait (default 365) */
   dagen?: number;
+  /** op welke fase(s) van de meter het apparaat hangt (gemeten of bekend), leeg als dat nog niet is vastgesteld; zware apparaten kunnen over meerdere fases verdeeld zijn */
+  fase?: Fase[];
   /** hoe zeker is de schatting */
   zeker: 'goed' | 'redelijk' | 'ruw';
   opmerking?: string;

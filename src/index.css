@@ -34,7 +34,7 @@
 }
 
 @media (prefers-color-scheme: dark) {
-  :root {
+  :root:not([data-theme='light']) {
     color-scheme: dark;
     --page: #0d0d0d;
     --surface-1: #1a1a19;
@@ -61,6 +61,34 @@
     --series-4: #c98500;
     --shadow: none;
   }
+}
+
+:root[data-theme='dark'] {
+  color-scheme: dark;
+  --page: #0d0d0d;
+  --surface-1: #1a1a19;
+  --surface-2: #242422;
+  --text-primary: #ffffff;
+  --text-secondary: #c3c2b7;
+  --text-muted: #8f8d86;
+  --grid: #2c2c2a;
+  --axis: #45453f;
+  --border: rgba(255, 255, 255, 0.1);
+  --accent: #3987e5;
+  --accent-ink: #86b6ef;
+  --accent-wash: rgba(57, 135, 229, 0.16);
+  --good-ink: #0ca30c;
+  --bad-ink: #e66767;
+  --warn-bg: #3a2c0a;
+  --warn-ink: #f5c86a;
+  --live-bg: #12331a;
+  --live-ink: #7ad67a;
+
+  --series-1: #3987e5;
+  --series-2: #d95926;
+  --series-3: #199e70;
+  --series-4: #c98500;
+  --shadow: none;
 }
 
 * {
@@ -113,7 +141,7 @@ button {
 }
 
 .topbar h1 {
-  font-size: 20px;
+  font-size: 30px;
   font-weight: 650;
   letter-spacing: -0.01em;
 }
@@ -221,7 +249,7 @@ button {
 }
 
 .card-head h2 {
-  font-size: 15px;
+  font-size: 25px;
   font-weight: 650;
 }
 
@@ -1256,13 +1284,21 @@ input[type='range']::-moz-range-thumb {
 }
 
 @media (prefers-color-scheme: dark) {
-  :root {
+  :root:not([data-theme='light']) {
     --comp-1: #9085e9;
     --comp-2: #d55181;
     --comp-3: #008300;
     --comp-4: #e66767;
     --comp-5: #3987e5;
   }
+}
+
+:root[data-theme='dark'] {
+  --comp-1: #9085e9;
+  --comp-2: #d55181;
+  --comp-3: #008300;
+  --comp-4: #e66767;
+  --comp-5: #3987e5;
 }
 
 .winter-summary {
@@ -1327,10 +1363,15 @@ input[type='range']::-moz-range-thumb {
 }
 
 @media (prefers-color-scheme: dark) {
-  :root {
+  :root:not([data-theme='light']) {
     --on-comp-2: #ffffff;
     --cost-total: #c3c2b7;
   }
+}
+
+:root[data-theme='dark'] {
+  --on-comp-2: #ffffff;
+  --cost-total: #c3c2b7;
 }
 
 .kpi-row {
@@ -1357,6 +1398,7 @@ input[type='range']::-moz-range-thumb {
 
 .kpi-label {
   font-size: 13px;
+  font-weight: 700;
   color: var(--text-secondary);
 }
 
@@ -1825,6 +1867,38 @@ input[type='range']::-moz-range-thumb {
   }
 }
 
+/* batterijregels hebben drie kolommen (naam, balk, bedrag); de leveranciersregel heeft er vijf */
+.battery-row {
+  grid-template-columns: minmax(220px, 1fr) minmax(160px, 2fr) minmax(200px, 1fr);
+  gap: 24px;
+  cursor: default;
+}
+
+.battery-row:hover {
+  background: transparent;
+}
+
+.battery-row.duo-row {
+  grid-template-columns: minmax(0, 1fr) minmax(220px, auto);
+}
+
+.battery-row .supplier-total {
+  text-align: right;
+  justify-items: end;
+}
+
+.battery-row .supplier-name {
+  gap: 4px;
+  justify-items: start;
+}
+
+@media (max-width: 640px) {
+  .battery-row {
+    grid-template-columns: minmax(0, 1fr) auto;
+    gap: 12px;
+  }
+}
+
 .app-field {
   display: flex;
   flex-direction: column;
@@ -1939,4 +2013,71 @@ input[type='range']::-moz-range-thumb {
   background: var(--surface-2);
   color: var(--text);
   box-shadow: inset 0 0 0 1px var(--border);
+}
+
+.phase-grid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 16px;
+}
+
+@media (max-width: 900px) {
+  .phase-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+.phase-box {
+  display: grid;
+  align-content: start;
+  gap: 4px;
+  padding: 14px 16px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background: var(--surface-1);
+}
+
+.phase-count {
+  font-size: 22px;
+  font-weight: 650;
+  letter-spacing: -0.01em;
+}
+
+.app-footer {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 12px;
+  max-width: 1240px;
+  margin: 8px auto 0;
+  padding: 16px 0 32px;
+  border-top: 1px solid var(--border);
+  font-size: 13px;
+  color: var(--text-secondary);
+}
+
+.theme-toggle {
+  display: inline-flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 10px;
+  max-width: 100%;
+}
+
+.fase-field {
+  border: 0;
+  padding: 0;
+  margin: 0;
+  min-width: 0;
+}
+.fase-options {
+  display: flex;
+  gap: 16px;
+  padding: 6px 0;
+}
+.fase-options label {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
 }
