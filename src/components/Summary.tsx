@@ -3,6 +3,7 @@ import { selfConsumption, selfSufficiency } from '../model/costs';
 import type { Settlement } from '../model/settlement';
 import type { Outcome, Scenario } from '../model/types';
 import { fmt } from './charts/scale';
+import { Rich } from './Rich';
 
 export interface Investment {
   label: string;
@@ -79,11 +80,11 @@ export function Summary({ outcome, reference, scenario, scenarioLabel, investmen
               <span className="k">Termijnbedrag Greenchoice per maand</span>
               <TermijnInput value={termijnbedrag} onChange={onTermijnbedrag} />
             </div>
-            <p className="hint">
+            <Rich as="p" className="hint">
               Bij dit scenario past ongeveer {fmt.eur(advies)} per maand
               {settlement &&
                 ` · eindnota huidig contract: ${settlement.saldo <= 0 ? `ca. ${fmt.eur(-settlement.saldo)} terug` : `ca. ${fmt.eur(settlement.saldo)} bijbetalen`}`}
-            </p>
+            </Rich>
           </div>
         </div>
         <div className="stat-grid">
@@ -118,7 +119,7 @@ function Stat({ label, value, note }: { label: string; value: string; note?: str
     <div className="stat">
       <span className="stat-label">{label}</span>
       <span className="stat-value">{value}</span>
-      {note && <span className="stat-note">{note}</span>}
+      {note && <Rich as="span" className="stat-note">{note}</Rich>}
     </div>
   );
 }

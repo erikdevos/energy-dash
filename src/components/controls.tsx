@@ -1,4 +1,5 @@
 import { useId, useState, type ReactNode } from 'react';
+import { Rich } from './Rich';
 
 interface SliderProps {
   label: string;
@@ -61,7 +62,7 @@ export function Slider({ label, value, min, max, step, onChange, display, hint, 
           <span className="range-ref" style={{ left: `${refPct}%` }} title="Waarde uit jaaropgave/startpunt" />
         )}
       </div>
-      {hint && <p className="hint">{hint}</p>}
+      {hint && <Rich as="p" className="hint">{hint}</Rich>}
     </div>
   );
 }
@@ -103,7 +104,7 @@ export function Toggle({ label, checked, onChange, hint }: { label: string; chec
         <label htmlFor={id}>{label}</label>
         <input id={id} type="checkbox" role="switch" className="switch" checked={checked} onChange={(e) => onChange(e.target.checked)} />
       </div>
-      {hint && <p className="hint">{hint}</p>}
+      {hint && <Rich as="p" className="hint">{hint}</Rich>}
     </div>
   );
 }

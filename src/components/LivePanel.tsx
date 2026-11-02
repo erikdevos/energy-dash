@@ -6,6 +6,7 @@ import { Segmented } from './controls';
 import { StackedColumns } from './charts/StackedColumns';
 import { fmt } from './charts/scale';
 import { FLOW_SERIES } from './charts/series';
+import { Rich } from './Rich';
 
 const kw = (w: number) => `${fmt.one(w / 1000)} kW`;
 
@@ -170,14 +171,14 @@ export function LivePanel({ live, sinceNota }: Props) {
           }}
         />
       ) : (
-        <p className="hint">Nog geen meetgegevens in deze periode.</p>
+        <Rich as="p" className="hint">Nog geen meetgegevens in deze periode.</Rich>
       )}
       {first && (
-        <p className="hint">
+        <Rich as="p" className="hint">
           Opgeslagen per kwartier sinds{' '}
           {first.toLocaleString('nl-NL', { day: 'numeric', month: 'long', year: 'numeric', hour: '2-digit', minute: '2-digit' })} in{' '}
           <code>data/{mode === 'mock' ? 'p1-mock' : 'p1'}/</code>. Er wordt alleen gemeten zolang de server of de collector draait.
-        </p>
+        </Rich>
       )}
     </Card>
   );

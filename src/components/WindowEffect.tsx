@@ -6,6 +6,7 @@ import { Card } from './Card';
 import { Segmented } from './controls';
 import { StackedColumns } from './charts/StackedColumns';
 import { fmt } from './charts/scale';
+import { Rich } from './Rich';
 
 const KEY = 'energy-dash:kozijnen:v1';
 const DAY = 24 * 3600_000;
@@ -114,10 +115,10 @@ export function WindowEffect() {
           <span className="k">Eerste dag met de nieuwe kozijnen</span>
           <input type="date" value={stored.datum ?? ''} onChange={(e) => save({ datum: e.target.value })} />
         </label>
-        <span className="hint">
+        <Rich as="span" className="hint">
           {fx.nBefore} dagen gemeten vóór de vervanging.{' '}
           {need > 0 ? `Nog minstens ${need} dagen nodig voor een betrouwbare vergelijking.` : 'Genoeg voor een betrouwbaar model.'}
-        </span>
+        </Rich>
       </div>
 
       {error && <p className="error-line">{error}</p>}
@@ -127,38 +128,38 @@ export function WindowEffect() {
           <div className="kpi">
             <span className="kpi-label">Besparing door de kozijnen</span>
             <span className="kpi-value good">{Math.round(fx.savingPct * 100)}%</span>
-            <span className="kpi-sub">
+            <Rich as="span" className="kpi-sub">
               {fmt.kwh(fx.saving)} minder dan verwacht over {fx.nAfter} dagen (± {fmt.kwh(fx.margin)}).
-            </span>
+            </Rich>
           </div>
           <div className="kpi">
             <span className="kpi-label">Verwacht met oude kozijnen</span>
             <span className="kpi-value">{fmt.kwh(fx.predictedAfter)}</span>
-            <span className="kpi-sub">bij het weer van die dagen.</span>
+            <Rich as="span" className="kpi-sub">bij het weer van die dagen.</Rich>
           </div>
           <div className="kpi">
             <span className="kpi-label">Werkelijk gemeten</span>
             <span className="kpi-value">{fmt.kwh(fx.actualAfter)}</span>
-            <span className="kpi-sub">jouw aanname voor je plannen was 40 tot 50%.</span>
+            <Rich as="span" className="kpi-sub">jouw aanname voor je plannen was 40 tot 50%.</Rich>
           </div>
         </div>
       ) : (
-        <p className="hint">
+        <Rich as="p" className="hint">
           {stored.datum
             ? fx.nAfter === 0
               ? 'Er zijn nog geen volle dagen na de vervanging. Kom over een paar dagen terug.'
               : 'Het model heeft nog te weinig dagen van vóór de vervanging.'
             : 'Vul de eerste dag in waarop de nieuwe kozijnen erin zitten. Tot die tijd verzamelt het dashboard de basislijn.'}
-        </p>
+        </Rich>
       )}
 
       {share !== null && (
-        <p className="hint">
+        <Rich as="p" className="hint">
           {room.naam} is {Math.round(share * 100)}% van het gemeten Adax-verbruik.
           {fx.savingPct !== null
             ? ` Rekent de besparing door naar alle gemeten radiatoren, dan is dat ongeveer ${Math.round(share * fx.savingPct * 100)}% minder verwarming (jouw aanname voor het hele huis: 40 tot 50%), mits de ruimtes zonder Adax-meting niet veel stoken.`
             : ' Zodra de besparing bekend is, reken ik die hiermee door naar het hele huis.'}
-        </p>
+        </Rich>
       )}
 
       {days.length > 0 && (
@@ -179,7 +180,7 @@ export function WindowEffect() {
       )}
       {days.length > 0 && (
         <div className="pellet-days">
-          <span className="hint">Op welke dagen brandde de pelletkachel? De kachel neemt warmte van de radiator over, dus dit corrigeert de meting.</span>
+          <Rich as="span" className="hint">Op welke dagen brandde de pelletkachel? De kachel neemt warmte van de radiator over, dus dit corrigeert de meting.</Rich>
           <div className="chips">
             {days.map((d, i) => (
               <button
@@ -198,13 +199,13 @@ export function WindowEffect() {
           </div>
         </div>
       )}
-      <p className="hint">
+      <Rich as="p" className="hint">
         Zo werkt het: uit de dagen vóór de vervanging leert het model hoeveel deze radiator verbruikt bij een bepaalde temperatuur en
         zonnestraling (weer van Open-Meteo). Dat wordt doorgetrokken naar de dagen erna. Wat er echt minder verbruikt wordt, is de
         besparing. Houd het dashboard draaien: Adax geeft maar een week terug, dus elke week dat de server uit staat, mist er data.
         Een koude start met veel zon of een dag met feest en kamerwarmte kan het resultaat flink verschuiven, dus kijk vooral naar
         het gemiddelde over een paar weken.
-      </p>
+      </Rich>
     </Card>
   );
 }

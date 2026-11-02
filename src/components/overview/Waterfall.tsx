@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import type { Step } from '../../model/overview';
 import { fmt } from '../charts/scale';
+import { Rich } from '../Rich';
 
 /**
  * Horizontale watervalgrafiek: per rij een stand (totaal) of een stap omhoog/omlaag in € per jaar.
@@ -48,7 +49,7 @@ export function Waterfall({ steps }: { steps: Step[] }) {
               ) : (
                 <span>{r.label}</span>
               )}
-              {r.detail && <span className="wf-detail">{r.detail}</span>}
+              {r.detail && <Rich as="span" className="wf-detail">{r.detail}</Rich>}
             </div>
             <div className="wf-track" role="cell" aria-hidden="true">
               <span className="wf-zero" style={{ left: `${pos(0)}%` }} />

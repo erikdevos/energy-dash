@@ -8,6 +8,7 @@ import { Card } from './Card';
 import { Segmented } from './controls';
 import { StackedColumns } from './charts/StackedColumns';
 import { fmt } from './charts/scale';
+import { Rich } from './Rich';
 
 /** Aanpassingen uit eerdere versies stonden in de browser; die worden eenmalig overgenomen in het bestand. */
 const OLD_KEY = 'energy-dash:apparaten:v1';
@@ -107,7 +108,7 @@ export function AppliancesTab({ modelKwh, pricePerKwh, boilerMonthly, kwp }: Pro
   return (
     <>
       {bron === 'voorbeeld' && (
-        <p className="hint span-2">Je ziet het voorbeeld (data/apparaten.mock.json). Zodra je iets aanpast of toevoegt, maakt het dashboard je eigen lijst aan in data/apparaten.json (privé, niet in git).</p>
+        <Rich as="p" className="hint span-2">Je ziet het voorbeeld (data/apparaten.mock.json). Zodra je iets aanpast of toevoegt, maakt het dashboard je eigen lijst aan in data/apparaten.json (privé, niet in git).</Rich>
       )}
       {saveError && <p className="error-line span-2">{saveError}</p>}
       <datalist id="kamers">
@@ -119,23 +120,30 @@ export function AppliancesTab({ modelKwh, pricePerKwh, boilerMonthly, kwp }: Pro
         <div className="kpi">
           <span className="kpi-label">{room === 'alles' ? 'Opgetelde apparaten' : room}</span>
           <span className="kpi-value">{fmt.kwh(prof.total)}</span>
-          <span className="kpi-sub">per jaar, ca. {fmt.eur(prof.total * pricePerKwh)} aan stroom. Schatting op typische vermogens.</span>
+          <Rich as="span" className="kpi-sub">per jaar, ca. {fmt.eur(prof.total * pricePerKwh)} aan stroom. Schatting op typische vermogens.</Rich>
         </div>
         {room === 'alles' && (
         <div className="kpi">
           <span className="kpi-label">Model: huishouden en was</span>
           <span className="kpi-value">{fmt.kwh(modelKwh)}</span>
-          <span className="kpi-sub">
+          <Rich as="span" className="kpi-sub">
             {gap > 0
               ? `${fmt.kwh(gap)} meer dan de apparaten verklaren. Dat is ruimte voor sluipverbruik of onderschatte vermogens.`
               : `${fmt.kwh(-gap)} minder dan de apparaten opleveren. Of de apparaatschattingen zijn te hoog, of het model stopt te veel in verwarming en boiler.`}
-          </span>
+          </Rich>
         </div>
         )}
         <div className="kpi">
           <span className="kpi-label">Grootste drie</span>
-          <span className="kpi-value small">{top3.map((a) => a.naam.split(' (')[0]).join(', ')}</span>
-          <span className="kpi-sub">{fmt.kwh(top3.reduce((s, a) => s + yearlyKwh(a), 0))} samen, {Math.round((top3.reduce((s, a) => s + yearlyKwh(a), 0) / Math.max(1, prof.total)) * 100)}% van het totaal.</span>
+          <ul className="top-list">
+            {top3.map((a) => (
+              <li key={a.id}>
+                <span className="top-name">{a.naam.split(' (')[0]}</span>
+                <span className="top-kwh">{fmt.kwh(yearlyKwh(a))}</span>
+              </li>
+            ))}
+          </ul>
+          <Rich as="span" className="kpi-sub">{fmt.kwh(top3.reduce((s, a) => s + yearlyKwh(a), 0))} samen, {Math.round((top3.reduce((s, a) => s + yearlyKwh(a), 0) / Math.max(1, prof.total)) * 100)}% van het totaal.</Rich>
         </div>
       </section>
 
@@ -183,10 +191,10 @@ export function AppliancesTab({ modelKwh, pricePerKwh, boilerMonthly, kwp }: Pro
           format={(v) => `${(v * 1000).toFixed(0)} Wh`}
           extraRows={(i) => [{ label: 'Totaal', value: `${(dayTotal(i) * 1000).toFixed(0)} Wh`, strong: true }]}
         />
-        <p className="hint">
+        <Rich as="p" className="hint">
           Verwarming en boiler staan er niet bij: die hebben hun eigen model. De vorm per apparaat is een aanname over wanneer het draait
           (avond, rond maaltijden, de hele dag). De Chargee-meter laat straks zien waar dit patroon afwijkt van de werkelijkheid.
-        </p>
+        </Rich>
       </Card>
 
       <Card
@@ -209,16 +217,16 @@ export function AppliancesTab({ modelKwh, pricePerKwh, boilerMonthly, kwp }: Pro
                   <span className="supplier-rank">{i + 1}</span>
                   <span className="supplier-name">
                     <strong>{a.naam}</strong>
-                    <span className="supplier-sub">
+                    <Rich as="span" className="supplier-sub">
                       {a.ruimte} · {cat.label} · {SHAPE_LABELS[a.vorm]}
-                    </span>
+                    </Rich>
                   </span>
                   <span className="supplier-track" aria-hidden="true">
                     <span className="supplier-bar" style={{ width: `${(y / max) * 100}%`, background: cat.color }} />
                   </span>
                   <span className="supplier-total">
                     <strong>{fmt.kwh(y)}</strong>
-                    <span className="supplier-sub">{fmt.eur(y * pricePerKwh)} per jaar</span>
+                    <Rich as="span" className="supplier-sub">{fmt.eur(y * pricePerKwh)} per jaar</Rich>
                   </span>
                   <span className="supplier-delta">{ZEKER[a.zeker]}</span>
                 </button>
@@ -264,7 +272,7 @@ export function AppliancesTab({ modelKwh, pricePerKwh, boilerMonthly, kwp }: Pro
                         ))}
                       </select>
                     </label>
-                    {a.opmerking && <p className="hint">{a.opmerking}</p>}
+                    {a.opmerking && <Rich as="p" className="hint">{a.opmerking}</Rich>}
                     <button type="button" className="ghost-btn" onClick={() => remove(a.id)}>
                       Verwijderen
                     </button>
@@ -274,10 +282,10 @@ export function AppliancesTab({ modelKwh, pricePerKwh, boilerMonthly, kwp }: Pro
             );
           })}
         </div>
-        <p className="hint">
+        <Rich as="p" className="hint">
           Vermogens zijn typische waarden en jouw opgave van de gebruiksduur, geen metingen. Een stekkermeter van een paar euro op de
           handdoekradiator, droger en diepvries geeft de grootste winst in nauwkeurigheid. Wijzigingen worden opgeslagen in data/apparaten.json (alleen op deze computer, niet in git).
-        </p>
+        </Rich>
       </Card>
     </>
   );

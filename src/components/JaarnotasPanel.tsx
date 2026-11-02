@@ -6,6 +6,7 @@ import type { JaarnotaSet } from '../lib/api';
 import { Card } from './Card';
 import { Segmented } from './controls';
 import { fmt } from './charts/scale';
+import { Rich } from './Rich';
 
 interface Props {
   set: JaarnotaSet;
@@ -112,19 +113,19 @@ export function JaarnotasPanel({ set, models, priceYear, dalVanafUur, targets, t
           </tbody>
         </table>
       </div>
-      <p className="hint">
+      <Rich as="p" className="hint">
         Met "Maanden …" kloppen de jaartotalen van dat kalenderjaar exact, en bepaalt het seizoenspatroon welk deel van je
         verbruik verwarming is (vergelijk de streepjes in "Stroom per maand"). Dat is de beste basis.
-      </p>
-      <p className="hint">
+      </Rich>
+      <Rich as="p" className="hint">
         Per nota stemt het model opwek en verbruik zo af dat afname én teruglevering kloppen. De opwek staat niet op de nota,
         dus die is geschat uit de verhouding tussen afname en teruglevering. Heb je de jaaropbrengst van je omvormer? Zet
         hem als <code>opwekOmvormer</code> in <code>data/jaarnotas.json</code>, dan wordt de schatting een meting.
-      </p>
-      <p className="hint">
+      </Rich>
+      <Rich as="p" className="hint">
         Valt het dal-aandeel van het model hoger uit dan op de nota? Dan draait in het echt meer verbruik overdag op
         werkdagen, bijvoorbeeld de warmtepomp of de boiler. Onder saldering maakt dat niets uit, zonder saldering wel.
-      </p>
+      </Rich>
     </Card>
   );
 }

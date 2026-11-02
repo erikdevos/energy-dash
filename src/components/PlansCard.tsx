@@ -1,6 +1,7 @@
 import type { PlanRow } from '../model/plans';
 import { Card } from './Card';
 import { fmt } from './charts/scale';
+import { Rich } from './Rich';
 
 interface Props {
   rows: PlanRow[];
@@ -36,11 +37,11 @@ export function PlansCard({ rows, total, columns, onApplyPlans, onRevert }: Prop
       }
     >
       {rows.length === 0 ? (
-        <p className="hint">
+        <Rich as="p" className="hint">
           Nog geen maatregelen aan. "Zet mijn plannen aan" rekent met de Daikin Perfera 3,5 kW in de centrale ruimte
           (60% van de warmte, SCOP 4,5), nieuwe kozijnen en garagedeur (45% minder warmtevraag, jouw verwachting 40-50%)
           en 70% van wassen, drogen en vaatwasser overdag. Daarna kun je elk getal links bij de schuifjes aanpassen.
-        </p>
+        </Rich>
       ) : (
         <div className="table-wrap">
           <table className="data-table plans">
@@ -58,7 +59,7 @@ export function PlansCard({ rows, total, columns, onApplyPlans, onRevert }: Prop
                 <tr key={r.id} className={r.id === 'totaal' ? 'total-row' : ''}>
                   <td>
                     <strong>{r.label}</strong>
-                    {r.detail && <span className="plan-detail">{r.detail}</span>}
+                    {r.detail && <Rich as="span" className="plan-detail">{r.detail}</Rich>}
                   </td>
                   <td>{fmt.kwh(r.kwh)}</td>
                   {r.eur.map((v, k) => (
@@ -72,12 +73,12 @@ export function PlansCard({ rows, total, columns, onApplyPlans, onRevert }: Prop
           </table>
         </div>
       )}
-      <p className="hint">
+      <Rich as="p" className="hint">
         Met saldering (2026) levert verschuiven naar zonuren nauwelijks iets op: teruggeleverde stroom telt dan even zwaar als
         afgenomen stroom. Zonder saldering (2027) wel. Airco en kozijnen verlagen allebei de stookstroom, dus samen leveren ze
         minder op dan los opgeteld. De besparing door de kozijnen is jouw schatting; na deze winter laat de maanddata zien
         wat het echt was.
-      </p>
+      </Rich>
     </Card>
   );
 }

@@ -4,6 +4,7 @@ import { Card } from './Card';
 import { PELLET_KWH_PER_KG } from '../model/profiles';
 import { StackedColumns, type StackSeries } from './charts/StackedColumns';
 import { fmt } from './charts/scale';
+import { Rich } from './Rich';
 
 const FULL_MONTHS = ['januari', 'februari', 'maart', 'april', 'mei', 'juni', 'juli', 'augustus', 'september', 'oktober', 'november', 'december'];
 
@@ -74,33 +75,33 @@ export function ConsumptionChart({ outcome, pricePerKwh, pelletPrijsPerKg }: Pro
         <div className="stat">
           <span className="stat-label">November t/m maart</span>
           <span className="stat-value">{fmt.kwh(winterTotal)}</span>
-          <span className="stat-note">waarvan {fmt.kwh(winterImp)} van het net</span>
+          <Rich as="span" className="stat-note">waarvan {fmt.kwh(winterImp)} van het net</Rich>
         </div>
         <div className="stat">
           <span className="stat-label">Verwarming nov-mrt</span>
           <span className="stat-value">{fmt.kwh(heat)}</span>
-          <span className="stat-note">
+          <Rich as="span" className="stat-note">
             {fmt.pct(winterTotal ? heat / winterTotal : 0)} van je wintergebruik · ca. {fmt.eur(heat * pricePerKwh)} van het net
-          </span>
+          </Rich>
         </div>
         <div className="stat">
           <span className="stat-label">Boiler nov-mrt</span>
           <span className="stat-value">{fmt.kwh(boiler)}</span>
-          <span className="stat-note">ca. {fmt.eur(boiler * pricePerKwh)} van het net</span>
+          <Rich as="span" className="stat-note">ca. {fmt.eur(boiler * pricePerKwh)} van het net</Rich>
         </div>
         {pelletKwh > 0.5 && (
           <div className="stat">
             <span className="stat-label">Pelletkachel (geen stroom)</span>
             <span className="stat-value">{fmt.kwh(pelletKwh)} warmte</span>
-            <span className="stat-note">
+            <Rich as="span" className="stat-note">
               ca. {fmt.int(pelletKg)} kg pellets · {fmt.eur(pelletKg * pelletPrijsPerKg)} per jaar
-            </span>
+            </Rich>
           </div>
         )}
         <div className="stat">
           <span className="stat-label">Verwarming heel jaar</span>
           <span className="stat-value">{fmt.kwh(c.verwarming.reduce((a, b) => a + b, 0))}</span>
-          <span className="stat-note">boiler {fmt.kwh(c.boiler.reduce((a, b) => a + b, 0))}</span>
+          <Rich as="span" className="stat-note">boiler {fmt.kwh(c.boiler.reduce((a, b) => a + b, 0))}</Rich>
         </div>
       </div>
       <StackedColumns
@@ -113,11 +114,11 @@ export function ConsumptionChart({ outcome, pricePerKwh, pelletPrijsPerKg }: Pro
         height={260}
         extraRows={(m) => [{ label: 'Totaal', value: fmt.kwh(series.reduce((a, s) => a + c[s.key as keyof typeof c][m], 0)), strong: true }]}
       />
-      <p className="hint">
+      <Rich as="p" className="hint">
         Euro's zijn een indicatie tegen je stroomprijs incl. energiebelasting ({fmt.perKwh(pricePerKwh)} per kWh). Met
         saldering wordt een deel weggestreept tegen je zomerse teruglevering, vanaf 2027 niet meer. Hoe groot de verwarming
         precies is, hangt af van het weer in het model: met andere weerjaren ligt hij tussen ~1.700 en ~2.600 kWh per jaar.
-      </p>
+      </Rich>
     </Card>
   );
 }

@@ -4,6 +4,7 @@ import type { SupplierRow } from '../model/suppliers';
 import type { YearData } from '../model/types';
 import { Card } from './Card';
 import { fmt } from './charts/scale';
+import { Rich } from './Rich';
 
 interface Props {
   offer: Aanbieding;
@@ -45,21 +46,21 @@ export function OfferCard({ offer, rows, year }: Props) {
         <div className="kpi">
           <span className="kpi-label">Aanbod</span>
           <span className="kpi-value">{fmt.eur(offer.jaarkosten)}</span>
-          <span className="kpi-sub">
+          <Rich as="span" className="kpi-sub">
             per jaar, {fmt.eur(offer.perMaand)} per maand{offer.perMaandSlim ? `, ${fmt.eur(offer.perMaandSlim)} met slim verbruik` : ''}.
-          </span>
+          </Rich>
         </div>
         <div className="kpi">
           <span className="kpi-label">Model</span>
           <span className="kpi-value">{fmt.eur(mine.total)}</span>
-          <span className="kpi-sub">per jaar voor hetzelfde contract, {fmt.eur(mine.total - offer.jaarkosten)} meer dan het aanbod.</span>
+          <Rich as="span" className="kpi-sub">per jaar voor hetzelfde contract, {fmt.eur(mine.total - offer.jaarkosten)} meer dan het aanbod.</Rich>
         </div>
         <div className="kpi">
           <span className="kpi-label">Waar het verschil zit</span>
           <span className="kpi-value small">Prijsniveau op zonuren</span>
-          <span className="kpi-sub">
+          <Rich as="span" className="kpi-sub">
             Aanbod: {fmt.perKwh(offerSell)} per kWh teruglevering; model: {fmt.perKwh(modelSell)} (incl. bonus).
-          </span>
+          </Rich>
         </div>
       </div>
 
@@ -80,7 +81,7 @@ export function OfferCard({ offer, rows, year }: Props) {
               </span>
               <span className="supplier-total">
                 <strong>{o}</strong>
-                <span className="supplier-sub">model: {m}</span>
+                <Rich as="span" className="supplier-sub">model: {m}</Rich>
               </span>
             </div>
           </div>
@@ -88,9 +89,9 @@ export function OfferCard({ offer, rows, year }: Props) {
       </div>
 
       <h3 className="card-subhead">Hoe gevoelig is dit voor de prijzen?</h3>
-      <p className="hint">
+      <Rich as="p" className="hint">
         Alle beursprijzen van {year.priceYear} met een factor vermenigvuldigd. Een vast contract hangt niet van de beurs af.
-      </p>
+      </Rich>
       <div className="supplier-list" role="list">
         {sens.map((s) => (
           <div key={s.f} role="listitem" className="supplier">
@@ -100,17 +101,17 @@ export function OfferCard({ offer, rows, year }: Props) {
               </span>
               <span className="supplier-total">
                 <strong>{fmt.eur(s.own)}</strong>
-                <span className="supplier-sub">
+                <Rich as="span" className="supplier-sub">
                   {s.fixed !== null ? `beste vast ${fmt.eur(s.fixed)}${s.own < s.fixed ? ' (dynamisch goedkoper)' : ' (vast goedkoper)'}` : ''}
-                </span>
+                </Rich>
               </span>
             </div>
           </div>
         ))}
       </div>
-      <p className="hint">
+      <Rich as="p" className="hint">
         Voorwaarden: {offer.voorwaarden.join('; ')}. {offer.opmerking ?? ''}
-      </p>
+      </Rich>
     </Card>
   );
 }

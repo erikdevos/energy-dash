@@ -12,6 +12,16 @@ const BASE = 'https://api-1.adax.no/client-api';
 const STORE = join(DATA_DIR, 'adax', 'hourly.json');
 const RAW = join(DATA_DIR, 'adax', 'last-content.json');
 const SYNC_MS = 6 * 3600_000;
+// De energy_log geeft in de praktijk alleen dagtotalen (04:00 tot 04:00), ondanks wat de documentatie zegt.
+// Per uur zit er wel in /content?withEnergy=1: het verbruik van het afgelopen uur per radiator (energyTime, meestal op :15).
+// Die laten we elke kwartier opvragen en bewaren, zodat er vanaf nu per uur per ruimte een reeks groeit.
+const HOURLY = join(DATA_DIR, 'adax', 'uur.json');
+const HOURLY_MS = 15 * 60_000;
+
+interface StoredHourly {
+  /** per radiator (apparaat-id); optellen per ruimte gebeurt bij het lezen */
+  devices: Record<string, { roomId: string; naam: string; uren: Record<string, number> }>;
+}
 
 interface Stored {
   rooms: Record<string, { naam: string; uren: Record<string, number> }>;
@@ -23,6 +33,8 @@ export interface AdaxResponse {
   lastSync: string | null;
   error: string | null;
   rooms: Array<{ id: string; naam: string; uren: Array<[number, number]> }>;
+  /** verbruik per uur (eindtijdstip, Wh) per ruimte, vanaf de eerste keer dat we dit bijhouden */
+  uur: Array<{ id: string; naam: string; punten: Array<[number, number]> }>;
 }
 
 let token: { access: string; expires: number } | null = null;
@@ -89,6 +101,39 @@ async function sync(): Promise<void> {
   await writeJson(STORE, stored);
 }
 
+let hourlyBusy = false;
+
+async function sampleHourly(): Promise<void> {
+  if (hourlyBusy) return;
+  hourlyBusy = true;
+  try {
+    const content = await call<{ rooms?: Room[]; devices?: Array<{ id: string | number; roomId: string | number; energyTime?: number; energyWh?: number }> }>(
+      '/rest/v1/content/?withEnergy=1',
+    );
+    const rooms = parseRooms(content);
+    const stored = (await readJson<StoredHourly>(HOURLY)) ?? { devices: {} };
+    let changed = false;
+    for (const d of content.devices ?? []) {
+      if (typeof d.energyTime !== 'number' || typeof d.energyWh !== 'number') continue;
+      const roomId = String(d.roomId);
+      const naam = rooms.find((r) => String(r.id) === roomId)?.name ?? `Ruimte ${roomId}`;
+      const entry = (stored.devices[String(d.id)] ??= { roomId, naam, uren: {} });
+      entry.roomId = roomId;
+      entry.naam = naam;
+      const key = String(toMs(d.energyTime));
+      if (entry.uren[key] !== d.energyWh) {
+        entry.uren[key] = d.energyWh;
+        changed = true;
+      }
+    }
+    if (changed) await writeJson(HOURLY, stored);
+  } catch (e) {
+    console.error(`Adax uurverbruik: ${e instanceof Error ? e.message : String(e)}`);
+  } finally {
+    hourlyBusy = false;
+  }
+}
+
 function runSync(): Promise<void> {
   syncing ??= sync()
     .then(() => {
@@ -104,15 +149,29 @@ function runSync(): Promise<void> {
   return syncing;
 }
 
+/** Telt de radiatoren per ruimte op: eindtijdstip van het uur en Wh. */
+function hourlyByRoom(h: StoredHourly | null): AdaxResponse['uur'] {
+  const byRoom = new Map<string, { naam: string; punten: Map<number, number> }>();
+  for (const d of Object.values(h?.devices ?? {})) {
+    const room = byRoom.get(d.roomId) ?? { naam: d.naam, punten: new Map<number, number>() };
+    for (const [t, wh] of Object.entries(d.uren)) room.punten.set(Number(t), (room.punten.get(Number(t)) ?? 0) + wh);
+    byRoom.set(d.roomId, room);
+  }
+  return [...byRoom].map(([id, r]) => ({ id, naam: r.naam, punten: [...r.punten].sort((a, b) => a[0] - b[0]) }));
+}
+
 export const adax = {
   configured,
   start() {
     if (!configured()) return;
     void runSync();
     setInterval(() => void runSync(), SYNC_MS).unref();
+    void sampleHourly();
+    setInterval(() => void sampleHourly(), HOURLY_MS).unref();
   },
   async read(): Promise<AdaxResponse> {
     const stored = await readJson<Stored>(STORE);
+    const hourly = await readJson<StoredHourly>(HOURLY);
     return {
       configured: configured(),
       lastSync: stored?.lastSync ?? null,
@@ -124,6 +183,7 @@ export const adax = {
           .map(([t, wh]) => [Number(t), wh] as [number, number])
           .sort((a, b) => a[0] - b[0]),
       })),
+      uur: hourlyByRoom(hourly),
     };
   },
 };

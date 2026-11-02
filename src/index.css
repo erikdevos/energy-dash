@@ -1372,6 +1372,34 @@ input[type='range']::-moz-range-thumb {
   color: var(--text-secondary);
 }
 
+.top-list {
+  margin: 2px 0 0;
+  padding-left: 18px;
+  display: grid;
+  gap: 4px;
+  font-size: 14px;
+  line-height: 1.35;
+}
+
+.top-list li {
+  padding-left: 2px;
+}
+
+.top-list li::marker {
+  color: var(--text-secondary);
+}
+
+.top-name {
+  font-weight: 400;
+}
+
+.top-kwh {
+  margin-left: 8px;
+  font-size: 13px;
+  color: var(--text-secondary);
+  font-variant-numeric: tabular-nums;
+}
+
 .kpi-inline {
   display: flex;
   flex-wrap: wrap;
@@ -1889,4 +1917,26 @@ input[type='range']::-moz-range-thumb {
 .card-subhead {
   margin: 20px 0 6px;
   font-size: 15px;
+}
+
+/* bedragen en verbruik in lopende tekst */
+.val {
+  display: inline-block;
+  padding: 0 6px;
+  border-radius: 6px;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+  line-height: 1.5;
+  white-space: nowrap;
+}
+
+.val-eur {
+  background: var(--accent-wash);
+  color: var(--accent-ink);
+}
+
+.val-kwh {
+  background: var(--surface-2);
+  color: var(--text);
+  box-shadow: inset 0 0 0 1px var(--border);
 }

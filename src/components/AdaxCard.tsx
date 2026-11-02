@@ -4,6 +4,7 @@ import { useNow, usePoll } from '../lib/usePoll';
 import { Card } from './Card';
 import { StackedColumns } from './charts/StackedColumns';
 import { fmt } from './charts/scale';
+import { Rich } from './Rich';
 
 const COLORS = ['var(--series-1)', 'var(--series-2)', 'var(--series-3)', 'var(--series-4)', 'var(--comp-1)', 'var(--comp-2)'];
 
@@ -47,10 +48,10 @@ export function AdaxCard() {
   if (!data.configured) {
     return (
       <Card title="Gemeten verbruik van je Adax-radiatoren" className="span-2" subtitle="Nog niet gekoppeld.">
-        <p className="hint">
+        <Rich as="p" className="hint">
           Maak in de Adax-app (Account, Remote user client API) een credential en zet client-ID en wachtwoord in je lokale .env als
           ADAX_CLIENT_ID en ADAX_CLIENT_SECRET. Herstart daarna het dashboard. Je radiatoren verschijnen hier met hun echte verbruik per dag.
-        </p>
+        </Rich>
       </Card>
     );
   }
@@ -58,7 +59,7 @@ export function AdaxCard() {
   if (!stats) {
     return (
       <Card title="Gemeten verbruik van je Adax-radiatoren" className="span-2" subtitle="Gekoppeld, nog geen gegevens.">
-        <p className="hint">{data.error ?? 'De eerste synchronisatie loopt. Ververs de pagina over een minuut.'}</p>
+        <Rich as="p" className="hint">{data.error ?? 'De eerste synchronisatie loopt. Ververs de pagina over een minuut.'}</Rich>
       </Card>
     );
   }
@@ -89,7 +90,7 @@ export function AdaxCard() {
               <div className="supplier-row">
                 <span className="supplier-name">
                   <strong>{r.label}</strong>
-                  <span className="supplier-sub">{fmt.kwh(r.perDay)} per dag gemiddeld</span>
+                  <Rich as="span" className="supplier-sub">{fmt.kwh(r.perDay)} per dag gemiddeld</Rich>
                 </span>
                 <span className="supplier-total">
                   <strong>{fmt.kwh(r.kwhFull)}</strong>
@@ -98,12 +99,12 @@ export function AdaxCard() {
             </div>
           ))}
       </div>
-      <p className="hint">
+      <Rich as="p" className="hint">
         Dit zijn de dagtotalen van Adax zelf (van 04:00 tot 04:00), niet geschat. Adax geeft maximaal een week terug en per dag, geen
         uurwaarden. Daarom bewaart het dashboard elke dag wat het ophaalt, zodat de geschiedenis groeit. Alleen de ruimtes in de
         Adax-app staan erin: pelletkachel, boiler en airco niet. Laatste synchronisatie:{' '}
         {data.lastSync ? new Date(data.lastSync).toLocaleString('nl-NL') : 'nog niet'}.
-      </p>
+      </Rich>
     </Card>
   );
 }

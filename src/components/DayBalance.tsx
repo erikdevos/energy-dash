@@ -7,6 +7,7 @@ import { Card } from './Card';
 import { Segmented } from './controls';
 import { StackedColumns } from './charts/StackedColumns';
 import { fmt } from './charts/scale';
+import { Rich } from './Rich';
 
 interface Props {
   apparaten: Appliance[];
@@ -73,7 +74,7 @@ export function DayBalance({ apparaten, boilerMonthly, kwp }: Props) {
   if (!dagen || !shown.length) {
     return dagen && !dagen.length ? (
       <Card title="Dagbalans: wat is verklaard?" className="span-2">
-        <p className="hint">Er zijn nog geen dagwaarden. Importeer de dagtabel van Greenchoice met `npm run import-dagen` (zie het begin van scripts/import-dagen.ts).</p>
+        <Rich as="p" className="hint">Er zijn nog geen dagwaarden. Importeer de dagtabel van Greenchoice met `npm run import-dagen` (zie het begin van scripts/import-dagen.ts).</Rich>
       </Card>
     ) : null;
   }
@@ -119,17 +120,17 @@ export function DayBalance({ apparaten, boilerMonthly, kwp }: Props) {
         <div className="kpi">
           <span className="kpi-label">Gemiddeld verbruik per dag</span>
           <span className="kpi-value">{fmt.kwh(loadAvg)}</span>
-          <span className="kpi-sub">over {shown.length} dagen, incl. geschatte zonne-opwek.</span>
+          <Rich as="span" className="kpi-sub">over {shown.length} dagen, incl. geschatte zonne-opwek.</Rich>
         </div>
         <div className="kpi">
           <span className="kpi-label">Verklaard</span>
           <span className="kpi-value">{fmt.kwh(known)}</span>
-          <span className="kpi-sub">per dag{withAdax.length ? ` (over ${withAdax.length} dagen met Adax-meting)` : ''}.</span>
+          <Rich as="span" className="kpi-sub">per dag{withAdax.length ? ` (over ${withAdax.length} dagen met Adax-meting)` : ''}.</Rich>
         </div>
         <div className="kpi">
           <span className="kpi-label">Onverklaard</span>
           <span className="kpi-value">{fmt.kwh(restAvg)}</span>
-          <span className="kpi-sub">per dag gemiddeld; kan negatief zijn als de schattingen te hoog zijn.</span>
+          <Rich as="span" className="kpi-sub">per dag gemiddeld; kan negatief zijn als de schattingen te hoog zijn.</Rich>
         </div>
       </div>
 
@@ -138,7 +139,7 @@ export function DayBalance({ apparaten, boilerMonthly, kwp }: Props) {
           <span className="k">Rendement zonnepanelen ({Math.round(pr * 100)}%)</span>
           <input type="range" min={0.6} max={1} step={0.01} value={pr} onChange={(e) => setPr(Number(e.target.value))} />
         </label>
-        <span className="hint">Zonne-opwek per dag = straling × {kwp.toLocaleString('nl-NL', { maximumFractionDigits: 1 })} kWp × dit rendement. Uitlezing van je omvormer zou dit precies maken.</span>
+        <Rich as="span" className="hint">Zonne-opwek per dag = straling × {kwp.toLocaleString('nl-NL', { maximumFractionDigits: 1 })} kWp × dit rendement. Uitlezing van je omvormer zou dit precies maken.</Rich>
       </div>
 
       <StackedColumns
@@ -158,12 +159,12 @@ export function DayBalance({ apparaten, boilerMonthly, kwp }: Props) {
           { label: 'Onverklaard', value: fmt.kwh(shown[i].rest), strong: true },
         ]}
       />
-      <p className="hint">
+      <Rich as="p" className="hint">
         Op dagen zonder Adax-meting bevat de grijze rest ook het verbruik van de radiatoren. Dit is een controle op de schattingen, geen meting: een positieve rest betekent verbruik dat nog geen naam heeft (bijvoorbeeld
         verwarming zonder Adax-meting of de pelletkachel op koude dagen), een negatieve rest dat de schattingen te hoog zijn. De
         meterwaarden van Greenchoice zijn op hele kWh afgerond. Wissel van maand: in de winter komt de droger erbij, loopt de
         verwarming op en schuift de verhouding. Met de pelletkachel aan daalt het verbruik van de radiatoren, zodat de rest anders ligt.
-      </p>
+      </Rich>
     </Card>
   );
 }

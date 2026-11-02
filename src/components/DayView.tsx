@@ -6,6 +6,7 @@ import { StackedColumns } from './charts/StackedColumns';
 import { StepLines } from './charts/StepLines';
 import { fmt } from './charts/scale';
 import { FLOW_SERIES } from './charts/series';
+import { Rich } from './Rich';
 
 interface Props {
   outcome: Outcome;
@@ -144,7 +145,7 @@ export function DayView({ outcome, scenario, priceYear, day, onDay }: Props) {
         <div>
           <span className="k">Energiekosten dag</span>
           <span className="v">{fmt.eur2(dayCost)}</span>
-          {scenario.regime === 'saldering' && <span className="hint">zonder saldering gerekend</span>}
+          {scenario.regime === 'saldering' && <Rich as="span" className="hint">zonder saldering gerekend</Rich>}
         </div>
       </div>
       <StackedColumns

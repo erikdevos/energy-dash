@@ -1,6 +1,7 @@
 import type { Settlement } from '../model/settlement';
 import { Card } from './Card';
 import { fmt } from './charts/scale';
+import { Rich } from './Rich';
 
 const datum = (iso: string) => new Date(iso).toLocaleDateString('nl-NL', { day: 'numeric', month: 'long', year: 'numeric' });
 const imp = (f: { impN: number; impD: number }) => f.impN + f.impD;
@@ -90,10 +91,10 @@ export function SettlementCard({ s, termijnbedrag }: { s: Settlement; termijnbed
           </div>
         </div>
       </details>
-      <p className="hint">
+      <Rich as="p" className="hint">
         Je vaste contract loopt af op {datum(s.tot)}, op dezelfde dag dat de saldering stopt. Daarna kies je een nieuw
         contract: zie "Contracten vergeleken".
-      </p>
+      </Rich>
     </Card>
   );
 }

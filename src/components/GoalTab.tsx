@@ -10,6 +10,7 @@ import { TermijnInput } from './Summary';
 import { StackedColumns } from './charts/StackedColumns';
 import { Waterfall } from './overview/Waterfall';
 import { fmt } from './charts/scale';
+import { Rich } from './Rich';
 
 interface Props {
   goal: Goal;
@@ -76,17 +77,17 @@ export function GoalTab({ goal, start, planned, dyn2027, data, termijnbedrag }: 
         <div className="kpi">
           <span className="kpi-label">Extra kosten door het einde van saldering</span>
           <span className="kpi-value bad">{fmt.eur(goal.extra)}</span>
-          <span className="kpi-sub">per jaar, met een dynamisch contract en zonder maatregelen (vast: {fmt.eur(goal.vast - goal.now)}).</span>
+          <Rich as="span" className="kpi-sub">per jaar, met een dynamisch contract en zonder maatregelen (vast: {fmt.eur(goal.vast - goal.now)}).</Rich>
         </div>
         <div className="kpi">
           <span className="kpi-label">Kozijnen en Daikin</span>
           <span className="kpi-value good">{fmt.eur(besloten)}</span>
-          <span className="kpi-sub">per jaar minder. Daarna nog {fmt.eur(gedragSaving)} met gedrag dat niets kost en {fmt.eur(invest)} met de rest.</span>
+          <Rich as="span" className="kpi-sub">per jaar minder. Daarna nog {fmt.eur(gedragSaving)} met gedrag dat niets kost en {fmt.eur(invest)} met de rest.</Rich>
         </div>
         <div className="kpi">
           <span className="kpi-label">Wat er overblijft</span>
           <span className="kpi-value">{fmt.eur(Math.max(0, remaining))}</span>
-          <span className="kpi-sub">per jaar extra ten opzichte van nu (2027: {fmt.eur(seq.end)} in totaal, nu {fmt.eur(goal.now)}).</span>
+          <Rich as="span" className="kpi-sub">per jaar extra ten opzichte van nu (2027: {fmt.eur(seq.end)} in totaal, nu {fmt.eur(goal.now)}).</Rich>
         </div>
       </section>
 
@@ -97,11 +98,11 @@ export function GoalTab({ goal, start, planned, dyn2027, data, termijnbedrag }: 
       >
         <Waterfall steps={steps} />
         <TermijnPlanner scenario={dyn2027.apply(seq.scenario)} fallback={dyn2027.apply(start)} data={data} termijnbedrag={termijnbedrag} />
-        <p className="hint">
+        <Rich as="p" className="hint">
           Bedragen zijn verwachte stroomkosten per jaar in 2027, zonder saldering, met het dynamische contract (Tibber-tarieven als
           referentie). Pellets vallen erbuiten, ook de besparing op pellets door de kozijnen (het model rekent met ongeveer 45% minder pelletwarmte). Het effect van een maatregel hangt af van de andere: een thuisbatterij die al zonnestroom
           opvangt, laat het verschuiven van apparaten minder opleveren, en andersom.
-        </p>
+        </Rich>
       </Card>
 
       <Card title="Wat doe je het eerst?" subtitle="Per maatregel: wat hij oplevert in deze volgorde, alleen, en als alles al gedaan is." className="span-2">
@@ -111,26 +112,26 @@ export function GoalTab({ goal, start, planned, dyn2027, data, termijnbedrag }: 
               <div className="supplier-row">
                 <span className="supplier-name">
                   <strong>{s.lever.label}</strong>
-                  <span className="supplier-sub">
+                  <Rich as="span" className="supplier-sub">
                     {s.lever.soort === 'besloten' ? 'Staat al vast, kost niets extra' : s.lever.soort === 'gedrag' ? 'Gedrag, kost niets' : 'Investering'} · {s.lever.detail}
-                  </span>
+                  </Rich>
                 </span>
                 <span className="supplier-total">
                   <strong>{fmt.eur(s.saving)} per jaar</strong>
-                  <span className="supplier-sub">
+                  <Rich as="span" className="supplier-sub">
                     alleen {fmt.eur(s.savingAlone)} · als laatste {fmt.eur(s.savingLast)}
-                  </span>
+                  </Rich>
                 </span>
               </div>
             </div>
           ))}
         </div>
-        <p className="hint">
+        <Rich as="p" className="hint">
           "Alleen" is wat de maatregel oplevert als je verder niets doet. "Als laatste" is wat hij nog toevoegt nadat alle andere al zijn
           gedaan. Een groot verschil betekent dat maatregelen elkaars werk overnemen. De boiler op zonuren is gratis, maar let op: een
           boiler van 80 liter voor vijf personen is krap als hij maar één keer per dag opwarmt. Het model rekent de warmteverliezen mee,
           maar niet of er genoeg warm water is voor iedereen.
-        </p>
+        </Rich>
       </Card>
 
       <Card
@@ -153,7 +154,7 @@ export function GoalTab({ goal, start, planned, dyn2027, data, termijnbedrag }: 
             <span className="k">Prijs per kWh (incl. installatie)</span>
             <input type="number" min={100} max={1500} step={25} value={perKwh} onChange={(e) => setPerKwh(Math.max(0, Number(e.target.value)))} />
           </label>
-          <span className="hint">Aanname: {fmt.eur(perKwh)} per kWh. Vraag een offerte; prijzen en subsidie verschillen sterk.</span>
+          <Rich as="span" className="hint">Aanname: {fmt.eur(perKwh)} per kWh. Vraag een offerte; prijzen en subsidie verschillen sterk.</Rich>
         </div>
         <div className="supplier-list" role="list">
           {rows.map((r, i) => {
@@ -165,25 +166,25 @@ export function GoalTab({ goal, start, planned, dyn2027, data, termijnbedrag }: 
                 <div className="supplier-row">
                   <span className="supplier-name">
                     <strong>{r.kwh} kWh</strong>
-                    <span className="supplier-sub">{fmt.eur(price)} aanschaf</span>
+                    <Rich as="span" className="supplier-sub">{fmt.eur(price)} aanschaf</Rich>
                   </span>
                   <span className="supplier-track" aria-hidden="true">
                     <span className="supplier-bar dynamisch" style={{ width: `${(Math.max(0, saving) / best) * 100}%` }} />
                   </span>
                   <span className="supplier-total">
                     <strong>{fmt.eur(saving)} per jaar</strong>
-                    <span className="supplier-sub">{Number.isFinite(years) ? `terugverdiend in ${years.toFixed(1).replace('.', ',')} jaar` : 'verdient zich niet terug'}</span>
+                    <Rich as="span" className="supplier-sub">{Number.isFinite(years) ? `terugverdiend in ${years.toFixed(1).replace('.', ',')} jaar` : 'verdient zich niet terug'}</Rich>
                   </span>
                 </div>
               </div>
             );
           })}
         </div>
-        <p className="hint">
+        <Rich as="p" className="hint">
           Grotere batterijen leveren steeds minder extra op: vanaf ongeveer 10 kWh vangt de batterij vooral de zomerse overschotten op,
           en dat zijn er in je situatie genoeg. De besparing hangt af van de beursprijzen, die per jaar verschillen. Levensduur en afname
           van de capaciteit zijn niet meegerekend; reken met 10 tot 15 jaar.
-        </p>
+        </Rich>
       </Card>
     </>
   );
@@ -225,11 +226,11 @@ function TermijnPlanner({ scenario, fallback, data, termijnbedrag }: { scenario:
   return (
     <div className="termijn-planner">
       <h3>Welk maandbedrag past hierbij?</h3>
-      <p className="hint">
+      <Rich as="p" className="hint">
         Je verwachte kosten in 2027 met deze keuzes zijn {fmt.eur(total)}, ongeveer {fmt.eur(fair)} per maand. Nu betaal je {fmt.eur(termijnbedrag)} per maand.
         Een laag bedrag geeft aan het eind een grote nota, een hoger bedrag is veiliger. "Nooit achter" is het laagste bedrag waarbij je in geen enkele maand achterloopt;
         "Als niets lukt" is het maandbedrag zonder maatregelen (alleen het dynamische contract).
-      </p>
+      </Rich>
       <div className="termijn-line">
         <span>Jouw maandbedrag:</span>
         <TermijnInput value={t} onChange={setChosen} />

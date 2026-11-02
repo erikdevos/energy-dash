@@ -4,6 +4,7 @@ import { useNow, usePoll } from '../lib/usePoll';
 import { Card } from './Card';
 import { StepLines } from './charts/StepLines';
 import { fmt } from './charts/scale';
+import { Rich } from './Rich';
 
 interface Props {
   /** dynamisch: opslag per kWh incl. BTW */
@@ -59,7 +60,7 @@ export function PricesToday({ opslag, eb, vastNormaal, vastDal }: Props) {
           <div className="stat">
             <span className="stat-label">Nu</span>
             <span className="stat-value">{fmt.perKwh(nowHour.p)}</span>
-            <span className="stat-note">jouw vaste prijs: {fmt.perKwh(vastNormaal)} normaal, {fmt.perKwh(vastDal)} dal</span>
+            <Rich as="span" className="stat-note">jouw vaste prijs: {fmt.perKwh(vastNormaal)} normaal, {fmt.perKwh(vastDal)} dal</Rich>
           </div>
         )}
         {blockToday && (
@@ -68,7 +69,7 @@ export function PricesToday({ opslag, eb, vastNormaal, vastDal }: Props) {
             <span className="stat-value">
               {hourLabel(blockToday.start)}-{hourLabel(blockToday.end)}
             </span>
-            <span className="stat-note">gemiddeld {fmt.perKwh(blockToday.avg)}</span>
+            <Rich as="span" className="stat-note">gemiddeld {fmt.perKwh(blockToday.avg)}</Rich>
           </div>
         )}
         {blockTomorrow && (
@@ -77,14 +78,14 @@ export function PricesToday({ opslag, eb, vastNormaal, vastDal }: Props) {
             <span className="stat-value">
               {hourLabel(blockTomorrow.start)}-{hourLabel(blockTomorrow.end)}
             </span>
-            <span className="stat-note">gemiddeld {fmt.perKwh(blockTomorrow.avg)}</span>
+            <Rich as="span" className="stat-note">gemiddeld {fmt.perKwh(blockTomorrow.avg)}</Rich>
           </div>
         )}
         {priciest && (
           <div className="stat">
             <span className="stat-label">Duurste uur vandaag</span>
             <span className="stat-value">{hourLabel(priciest.t)}</span>
-            <span className="stat-note">{fmt.perKwh(priciest.p)}</span>
+            <Rich as="span" className="stat-note">{fmt.perKwh(priciest.p)}</Rich>
           </div>
         )}
       </div>
@@ -100,10 +101,10 @@ export function PricesToday({ opslag, eb, vastNormaal, vastDal }: Props) {
           height={180}
         />
       )}
-      <p className="hint">
+      <Rich as="p" className="hint">
         Met je huidige vaste contract en saldering maakt het tijdstip voor je rekening (nog) niet uit. Vanaf 2027 wel: was, droog
         en vaat dan bij voorkeur in de goedkope uren en als je panelen leveren.
-      </p>
+      </Rich>
     </Card>
   );
 }

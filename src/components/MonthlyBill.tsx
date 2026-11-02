@@ -7,6 +7,7 @@ import { Segmented } from './controls';
 import { StackedColumns } from './charts/StackedColumns';
 import { fmt } from './charts/scale';
 import { TermijnInput } from './Summary';
+import { Rich } from './Rich';
 
 const MONTHS = ['jan', 'feb', 'mrt', 'apr', 'mei', 'jun', 'jul', 'aug', 'sep', 'okt', 'nov', 'dec'];
 const FULL = ['januari', 'februari', 'maart', 'april', 'mei', 'juni', 'juli', 'augustus', 'september', 'oktober', 'november', 'december'];
@@ -78,28 +79,28 @@ export function MonthlyBill({ rows, year, current, termijnbedrag }: Props) {
         <div className="kpi">
           <span className="kpi-label">Zwaarste maand</span>
           <span className="kpi-value">{fmt.eur(peak)}</span>
-          <span className="kpi-sub">in {FULL[peakMonth]}. Winter (nov t/m mrt) samen {fmt.eur(winter)}.</span>
+          <Rich as="span" className="kpi-sub">in {FULL[peakMonth]}. Winter (nov t/m mrt) samen {fmt.eur(winter)}.</Rich>
         </div>
         <div className="kpi">
           <span className="kpi-label">Eerlijk termijnbedrag</span>
           <span className="kpi-value">{fmt.eur(Math.max(0, total / 12))}</span>
-          <span className="kpi-sub">per maand, een twaalfde van {fmt.eur(total)} per jaar.</span>
+          <Rich as="span" className="kpi-sub">per maand, een twaalfde van {fmt.eur(total)} per jaar.</Rich>
         </div>
         <div className="kpi">
           <span className="kpi-label">Nooit achterlopen</span>
           <span className="kpi-value">{fmt.eur(Math.max(0, noArrears))}</span>
-          <span className="kpi-sub">per maand: dan sta je nooit in het rood, maar krijg je aan het eind veel terug.</span>
+          <Rich as="span" className="kpi-sub">per maand: dan sta je nooit in het rood, maar krijg je aan het eind veel terug.</Rich>
         </div>
       </div>
 
       <div className="termijn-line">
         <span>Jouw termijnbedrag per maand:</span>
         <TermijnInput value={t} onChange={setTermijn} />
-        <span className="hint">
+        <Rich as="span" className="hint">
           {lowest < 0
             ? `Laagste stand: ${fmt.eur(lowest)} eind ${FULL[worst]} (je loopt dan achter). Eind december staat je saldo op ${fmt.eur(reserve[11])}.`
             : `Je loopt nooit achter. Eind december staat je saldo op ${fmt.eur(reserve[11])}.`}
-        </span>
+        </Rich>
       </div>
 
       <StackedColumns
@@ -117,11 +118,11 @@ export function MonthlyBill({ rows, year, current, termijnbedrag }: Props) {
           { label: 'Saldo na termijn', value: fmt.eur(reserve[i]) },
         ]}
       />
-      <p className="hint">
+      <Rich as="p" className="hint">
         Dit zijn de kosten volgens het model, gebaseerd op beursprijzen van {year.priceYear} en jouw verbruiksprofiel. Vaste kosten,
         netbeheer en de vermindering energiebelasting zijn gelijk over de maanden verdeeld. Een leverancier rekent zelf met een
         voorschot en past dat meestal na een paar maanden aan op je werkelijke verbruik.
-      </p>
+      </Rich>
     </Card>
   );
 }

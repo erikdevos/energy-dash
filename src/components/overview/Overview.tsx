@@ -7,6 +7,7 @@ import { fmt } from '../charts/scale';
 import { TermijnInput } from '../Summary';
 import { EnergySplit } from './EnergySplit';
 import { Waterfall } from './Waterfall';
+import { Rich } from '../Rich';
 
 export type Tab = 'overzicht' | 'doel' | 'nu' | 'verbruik' | 'scenarios' | 'leveranciers' | 'apparaten' | 'gegevens';
 
@@ -47,7 +48,7 @@ export function Overview(p: Props) {
           ) : (
             <span className="kpi-value">-</span>
           )}
-          <span className="kpi-sub">Je vaste contract én de saldering stoppen op 1 januari 2027.</span>
+          <Rich as="span" className="kpi-sub">Je vaste contract én de saldering stoppen op 1 januari 2027.</Rich>
           <div className="kpi-inline">
             <span className="k">Termijnbedrag per maand</span>
             <TermijnInput value={p.termijnbedrag} onChange={p.onTermijnbedrag} />
@@ -56,19 +57,19 @@ export function Overview(p: Props) {
         <div className="kpi">
           <span className="kpi-label">Vanaf 2027 · zonder plannen</span>
           <span className="kpi-value bad">{fmt.eur(p.statusQuo2027)} per jaar</span>
-          <span className="kpi-sub">
+          <Rich as="span" className="kpi-sub">
             met een {contractName[p.contract]}. Nu is dat {fmt.eur(p.now)}: zo'n {fmt.eur(p.statusQuo2027 - p.now)} per jaar meer, vooral
             doordat de saldering stopt.
-          </span>
+          </Rich>
         </div>
         <div className="kpi">
           <span className="kpi-label">Vanaf 2027 · met jouw plannen</span>
           <span className={`kpi-value ${anyPlan ? 'good' : ''}`}>{fmt.eur(p.withPlans2027)} per jaar</span>
-          <span className="kpi-sub">
+          <Rich as="span" className="kpi-sub">
             {anyPlan
               ? `Je plannen schelen zo'n ${fmt.eur(p.statusQuo2027 - p.withPlans2027)} per jaar.`
               : 'Zet hieronder je plannen aan om te zien wat ze opleveren.'}
-          </span>
+          </Rich>
         </div>
       </section>
 
@@ -109,10 +110,10 @@ export function Overview(p: Props) {
           ))}
         </div>
         <Waterfall steps={p.steps} />
-        <p className="hint">
+        <Rich as="p" className="hint">
           Bedragen zijn verwachte stroomkosten per jaar, incl. vaste kosten, netbeheer en vermindering energiebelasting. Pellets
           vallen erbuiten. De aannames per plan pas je aan onder <button type="button" className="link-btn" onClick={() => p.onTab('scenarios')}>Scenario's</button>.
-        </p>
+        </Rich>
       </Card>
 
       <section className="insights span-2" aria-label="Inzichten">

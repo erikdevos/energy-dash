@@ -186,6 +186,8 @@ export interface AdaxData {
   lastSync: string | null;
   error: string | null;
   rooms: Array<{ id: string; naam: string; uren: Array<[number, number]> }>;
+  /** verbruik per uur (eindtijdstip, Wh) per ruimte, vanaf het moment dat dit wordt bijgehouden */
+  uur: Array<{ id: string; naam: string; punten: Array<[number, number]> }>;
 }
 
 /** Uurweer: temperatuur (°C) en zonnestraling (W/m²). */

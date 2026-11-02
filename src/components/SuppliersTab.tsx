@@ -7,6 +7,7 @@ import { MonthlyBill } from './MonthlyBill';
 import { OfferCard } from './OfferCard';
 import { api, type Aanbieding } from '../lib/api';
 import type { YearData } from '../model/types';
+import { Rich } from './Rich';
 
 interface Props {
   data: SupplierData;
@@ -48,21 +49,21 @@ export function SuppliersTab({ data, nowRows, planRows, plansActive, current, pr
         <div className="kpi">
           <span className="kpi-label">Goedkoopst voor jou in 2027</span>
           <span className="kpi-value good">{best ? best.contract.leverancier : '-'}</span>
-          <span className="kpi-sub">
+          <Rich as="span" className="kpi-sub">
             {best && `${best.contract.naam}: ${fmt.eur(best.total)} per jaar, ${fmt.eur(best.total / 12)} per maand.`}
-          </span>
+          </Rich>
         </div>
         <div className="kpi">
           <span className="kpi-label">Beste vaste contract</span>
           <span className="kpi-value">{bestVast ? bestVast.contract.leverancier : '-'}</span>
-          <span className="kpi-sub">
+          <Rich as="span" className="kpi-sub">
             {bestVast && `${fmt.eur(bestVast.total)} per jaar${bestDyn ? `, ${fmt.eur(bestVast.total - bestDyn.total)} meer dan het beste dynamische` : ''}.`}
-          </span>
+          </Rich>
         </div>
         <div className="kpi">
           <span className="kpi-label">Blijven bij {current} (vast)</span>
           <span className="kpi-value">{mine ? `${fmt.eur(mine.total)} per jaar` : '-'}</span>
-          <span className="kpi-sub">{mine && best ? `${fmt.eur(mine.total - best.total)} per jaar duurder dan de goedkoopste optie.` : ''}</span>
+          <Rich as="span" className="kpi-sub">{mine && best ? `${fmt.eur(mine.total - best.total)} per jaar duurder dan de goedkoopste optie.` : ''}</Rich>
         </div>
       </section>
 
@@ -93,7 +94,7 @@ export function SuppliersTab({ data, nowRows, planRows, plansActive, current, pr
         }
       >
         {household === 'plannen' && !plansActive && (
-          <p className="hint">Er staan nog geen plannen aan. Zet ze aan op het Overzicht om het effect te zien.</p>
+          <Rich as="p" className="hint">Er staan nog geen plannen aan. Zet ze aan op het Overzicht om het effect te zien.</Rich>
         )}
         <div className="supplier-list" role="list">
           {rows.map((r, i) => {
@@ -105,17 +106,17 @@ export function SuppliersTab({ data, nowRows, planRows, plansActive, current, pr
                   <span className="supplier-rank">{i + 1}</span>
                   <span className="supplier-name">
                     <strong>{r.contract.leverancier}</strong>
-                    <span className="supplier-sub">
+                    <Rich as="span" className="supplier-sub">
                       {r.contract.naam}
                       {isMine && ' · je huidige leverancier'}
-                    </span>
+                    </Rich>
                   </span>
                   <span className="supplier-track" aria-hidden="true">
                     <span className={`supplier-bar ${r.contract.type}`} style={{ width: `${(r.total / max) * 100}%` }} />
                   </span>
                   <span className="supplier-total">
                     <strong>{fmt.eur(r.total)}</strong>
-                    <span className="supplier-sub">{fmt.eur(r.total / 12)} p/m</span>
+                    <Rich as="span" className="supplier-sub">{fmt.eur(r.total / 12)} p/m</Rich>
                   </span>
                   <span className="supplier-delta">{i === 0 ? 'goedkoopst' : `+${fmt.eur(r.total - rows[0].total)}`}</span>
                 </button>
@@ -137,27 +138,27 @@ export function SuppliersTab({ data, nowRows, planRows, plansActive, current, pr
                       <span className="k">Netbeheer en vermindering EB</span>
                       <span className="v small">{fmt.eur(r.overig)}</span>
                     </div>
-                    <p className="hint">
+                    <Rich as="p" className="hint">
                       {r.contract.type === 'vast'
                         ? `Stroom ${fmt.perKwh(r.contract.stroomAllIn2026 ?? 0)} per kWh nu (incl. belasting 2026); teruglevering ${fmt.perKwh(r.contract.tlv2027 ?? 0)} vergoeding, ${fmt.perKwh(r.contract.tlk2027 ?? 0)} kosten.`
                         : `Beursprijs + ${fmt.perKwh(r.contract.opslag ?? 0)} per kWh; teruglevering beursprijs${r.contract.terugleverBonus ? ` + ${fmt.pct(r.contract.terugleverBonus)} bonus` : ''}${
                             r.contract.terugleverOpslag ? ` ${r.contract.terugleverOpslag > 0 ? '−' : '+'} ${fmt.perKwh(Math.abs(r.contract.terugleverOpslag))}` : ''
                           }. Panelen afschakelen bij negatieve prijs.`}{' '}
                       {r.contract.opmerking ?? ''} Bron: {r.contract.bron}.
-                    </p>
+                    </Rich>
                   </div>
                 )}
               </div>
             );
           })}
         </div>
-        <p className="hint">
+        <Rich as="p" className="hint">
           Aannames: het kale stroomtarief van vaste contracten blijft in 2027 gelijk aan het aanbod van nu; energiebelasting 2027
           volgens het Belastingplan (voorstel). Dynamisch rekent met de beursprijzen van {priceYear}. Vaste leveringskosten die een
           leverancier niet publiceert, staan op {fmt.eur2(data.vasteKostenAanname)} per maand (aanname). Welkomstkortingen tellen niet
           mee. Bijgewerkt: {data.bijgewerkt}.
-        </p>
-        <p className="hint">
+        </Rich>
+        <Rich as="p" className="hint">
           Bronnen:{' '}
           {data.bronnen.map((b, i) => (
             <span key={b.url}>
@@ -167,7 +168,7 @@ export function SuppliersTab({ data, nowRows, planRows, plansActive, current, pr
               </a>
             </span>
           ))}
-        </p>
+        </Rich>
       </Card>
 
       {offers.map((o) => (

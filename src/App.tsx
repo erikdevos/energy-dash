@@ -29,6 +29,7 @@ import { Sources } from './components/Sources';
 import { SettlementCard } from './components/SettlementCard';
 import { Summary, type Investment } from './components/Summary';
 import { fmt } from './components/charts/scale';
+import { Rich } from './components/Rich';
 
 const STORAGE_KEY = 'energy-dash:v6';
 const PELLET_MIGRATION = 'energy-dash:pellet-v2';
@@ -564,7 +565,7 @@ export default function App() {
                 termijnbedrag={termijnbedrag ?? 0}
               />
             ) : (
-              <p className="hint">Geen leveranciersgegevens gevonden (data/leveranciers.json).</p>
+              <Rich as="p" className="hint">Geen leveranciersgegevens gevonden (data/leveranciers.json).</Rich>
             ))}
 
           {tab === 'apparaten' && (
