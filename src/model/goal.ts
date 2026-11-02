@@ -140,26 +140,48 @@ export function computeGoal(start: Scenario, presets: Record<'nu' | 'vast2027' |
 
 export interface BatteryRow {
   kwh: number;
+  /** vermogen waarmee is gerekend (kW) */
+  kw: number;
   /** besparing per jaar t.o.v. geen batterij, zonder en met de overige maatregelen */
   savingNow: number;
   savingPlanned: number;
 }
 
-/** Wat levert een batterij van een bepaalde grootte op (dynamisch contract 2027)? */
-export function batterySweep(start: Scenario, planned: Scenario, preset: ContractPreset, data: YearData, sizes: number[]): BatteryRow[] {
+export interface BatterySpec {
+  kwh: number;
+  /** standaard: de helft van de capaciteit, tussen 2,5 en 5 kW */
+  kw?: number;
+  /** standaard: het rendement uit het scenario */
+  rendement?: number;
+}
+
+/** Wat levert een batterij van een bepaalde grootte en vermogen op (dynamisch contract 2027)? */
+export function batteryOptions(start: Scenario, planned: Scenario, preset: ContractPreset, data: YearData, specs: BatterySpec[]): BatteryRow[] {
   const cost = (s: Scenario) => run(preset.apply(s), data).total;
   const off = (s: Scenario): Scenario => ({ ...s, batterij: { ...s.batterij, aan: false } });
-  const withBat = (s: Scenario, kwh: number): Scenario => ({
+  const withBat = (s: Scenario, spec: BatterySpec): Scenario => ({
     ...s,
-    batterij: { ...s.batterij, aan: true, strategie: 'dynamisch', capaciteitKwh: kwh, vermogenKw: Math.min(5, Math.max(2.5, kwh / 2)) },
+    batterij: {
+      ...s.batterij,
+      aan: true,
+      strategie: 'dynamisch',
+      capaciteitKwh: spec.kwh,
+      vermogenKw: spec.kw ?? Math.min(5, Math.max(2.5, spec.kwh / 2)),
+      rendement: spec.rendement ?? s.batterij.rendement,
+    },
   });
   const baseNow = cost(off(start));
   const basePlanned = cost(off(planned));
-  return sizes.map((kwh) => ({
-    kwh,
-    savingNow: baseNow - cost(withBat(start, kwh)),
-    savingPlanned: basePlanned - cost(withBat(planned, kwh)),
+  return specs.map((spec) => ({
+    kwh: spec.kwh,
+    kw: withBat(start, spec).batterij.vermogenKw,
+    savingNow: baseNow - cost(withBat(start, spec)),
+    savingPlanned: basePlanned - cost(withBat(planned, spec)),
   }));
+}
+
+export function batterySweep(start: Scenario, planned: Scenario, preset: ContractPreset, data: YearData, sizes: number[]): BatteryRow[] {
+  return batteryOptions(start, planned, preset, data, sizes.map((kwh) => ({ kwh })));
 }
 
 export interface SequenceRow {

@@ -1,6 +1,6 @@
 import { useMemo, useState } from 'react';
 import { monthlyCosts, run } from '../model/costs';
-import { batterySweep, sequence, type Goal } from '../model/goal';
+import { batteryOptions, batterySweep, sequence, type Goal } from '../model/goal';
 import type { ContractPreset } from '../model/defaults';
 import type { Step } from '../model/overview';
 import type { Scenario, YearData } from '../model/types';
@@ -28,6 +28,11 @@ const SIZES = [5, 10, 15, 20];
 export function GoalTab({ goal, start, planned, dyn2027, data, termijnbedrag }: Props) {
   const [basis, setBasis] = useState<'nu' | 'plannen'>('plannen');
   const [perKwh, setPerKwh] = useState(Math.round(start.batterij.aanschafprijs / Math.max(1, start.batterij.capaciteitKwh)));
+  // kleine stekkerbatterijen: aannames, geen offerte
+  const [ppPrice, setPpPrice] = useState(1000);
+  const [ppKwh, setPpKwh] = useState(2.2);
+  const [ppKw, setPpKw] = useState(1.8);
+  const [ppEff, setPpEff] = useState(85);
   const [off, setOff] = useState<string[]>(() => {
     try {
       return JSON.parse(localStorage.getItem('energy-dash:doel:uit') ?? '[]') as string[];
@@ -49,6 +54,17 @@ export function GoalTab({ goal, start, planned, dyn2027, data, termijnbedrag }: 
     [start, dyn2027, data, goal, off],
   );
   const rows = useMemo(() => batterySweep(start, planned, dyn2027, data, SIZES), [start, planned, dyn2027, data]);
+  const ppRows = useMemo(
+    () =>
+      batteryOptions(
+        start,
+        planned,
+        dyn2027,
+        data,
+        [1, 2, 3, 4].map((n) => ({ kwh: n * ppKwh, kw: Math.min(5, n * ppKw), rendement: ppEff / 100 })),
+      ),
+    [start, planned, dyn2027, data, ppKwh, ppKw, ppEff],
+  );
 
   const steps: Step[] = [
     { label: 'Nu', detail: 'huidig contract, met saldering', value: goal.now, kind: 'total' },
@@ -70,6 +86,8 @@ export function GoalTab({ goal, start, planned, dyn2027, data, termijnbedrag }: 
   const invest = sumOf('investering');
   const rowsKey = rows.map((r) => (basis === 'nu' ? r.savingNow : r.savingPlanned));
   const best = Math.max(...rowsKey, 1);
+  const ppKey = ppRows.map((r) => (basis === 'nu' ? r.savingNow : r.savingPlanned));
+  const ppBest = Math.max(...ppKey, 1);
 
   return (
     <>
@@ -184,6 +202,61 @@ export function GoalTab({ goal, start, planned, dyn2027, data, termijnbedrag }: 
           Grotere batterijen leveren steeds minder extra op: vanaf ongeveer 10 kWh vangt de batterij vooral de zomerse overschotten op,
           en dat zijn er in je situatie genoeg. De besparing hangt af van de beursprijzen, die per jaar verschillen. Levensduur en afname
           van de capaciteit zijn niet meegerekend; reken met 10 tot 15 jaar.
+        </Rich>
+      </Card>
+
+      <Card
+        title="Plug-and-play batterijen: klein en goedkoop"
+        subtitle="Losse stekkerbatterijen (zoals Anker, Marstek, EcoFlow, Growatt), samen te stellen uit modules. Zelfde berekening, maar met lager vermogen."
+        className="span-2"
+      >
+        <div className="termijn-line">
+          <label className="app-field">
+            <span className="k">Prijs per module</span>
+            <input type="number" min={100} max={3000} step={50} value={ppPrice} onChange={(e) => setPpPrice(Math.max(0, Number(e.target.value)))} />
+          </label>
+          <label className="app-field">
+            <span className="k">kWh per module</span>
+            <input type="number" min={0.5} max={6} step={0.1} value={ppKwh} onChange={(e) => setPpKwh(Math.max(0.5, Number(e.target.value)))} />
+          </label>
+          <label className="app-field">
+            <span className="k">kW per module</span>
+            <input type="number" min={0.4} max={5} step={0.1} value={ppKw} onChange={(e) => setPpKw(Math.max(0.4, Number(e.target.value)))} />
+          </label>
+          <label className="app-field">
+            <span className="k">Rendement (%)</span>
+            <input type="number" min={70} max={98} step={1} value={ppEff} onChange={(e) => setPpEff(Math.min(98, Math.max(70, Number(e.target.value))))} />
+          </label>
+        </div>
+        <div className="supplier-list" role="list">
+          {ppRows.map((r, i) => {
+            const n = i + 1;
+            const saving = ppKey[i];
+            const price = n * ppPrice;
+            const years = saving > 0 ? price / saving : Infinity;
+            return (
+              <div key={n} role="listitem" className="supplier">
+                <div className="supplier-row">
+                  <span className="supplier-name">
+                    <strong>{n} {n === 1 ? 'module' : 'modules'}</strong>
+                    <Rich as="span" className="supplier-sub">{fmt.kwh(r.kwh)}, {r.kw.toFixed(1).replace('.', ',')} kW, {fmt.eur(price)} aanschaf</Rich>
+                  </span>
+                  <span className="supplier-track" aria-hidden="true">
+                    <span className="supplier-bar dynamisch" style={{ width: `${(Math.max(0, saving) / ppBest) * 100}%` }} />
+                  </span>
+                  <span className="supplier-total">
+                    <strong>{fmt.eur(saving)} per jaar</strong>
+                    <Rich as="span" className="supplier-sub">{Number.isFinite(years) ? `terugverdiend in ${years.toFixed(1).replace('.', ',')} jaar` : 'verdient zich niet terug'}</Rich>
+                  </span>
+                </div>
+              </div>
+            );
+          })}
+        </div>
+        <Rich as="p" className="hint">
+          Aannames: {fmt.eur(ppPrice)} per module van {fmt.kwh(ppKwh)}, elke module met een eigen omvormer van {ppKw.toFixed(1).replace('.', ',')} kW. Delen modules één omvormer, zet het vermogen dan lager.
+          De prijzen zijn jouw schatting, niet gecontroleerd; vraag actuele prijzen na. Het model gaat uit van perfecte aansturing op prijs en zon. Een stekkerbatterij die alleen de P1-meter volgt
+          doet vooral zelfverbruik, en dat levert in dit model ongeveer evenveel op. Zulke batterijen hebben geen noodstroom, en je moet nagaan of ze aan één fase hangen en wat dat voor jouw meter betekent.
         </Rich>
       </Card>
     </>
