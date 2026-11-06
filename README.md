@@ -92,5 +92,5 @@ Het dashboard stemt opwek en verbruik zo af dat afname én teruglevering van de 
 Alle aannames en bronnen staan ook onderaan in het dashboard.
 
 - Verbruiksprofielen zijn gemodelleerd, niet gemeten. Zodra er een paar weken Chargee-historie is, kunnen ze daarop worden afgesteld.
-- De slimme batterij en het slim laden van de auto kennen prijzen en zon 24 uur vooruit. Dat is optimistisch.
+- Het slim laden van de auto kent prijzen en zon 24 uur vooruit. De slimme batterij plant met de prijzen en de zon van het hele jaar vooraf (dynamisch programmeren, inclusief rendement en vermogen). Dat is optimistisch: een echte batterij kent de toekomst niet.
 - Je huidige contract heeft volgens de jaarnota's geen terugleverkosten. Voor "Vast 2027" gebruikt het model de verwachting uit het Greenchoice-rekenvoorbeeld (vergoeding € 0,054, kosten € 0,052 per kWh). Greenchoice markeert die zelf als schatting.

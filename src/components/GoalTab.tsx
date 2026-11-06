@@ -11,6 +11,7 @@ import { StackedColumns } from './charts/StackedColumns';
 import { Waterfall } from './overview/Waterfall';
 import { fmt } from './charts/scale';
 import { Rich } from './Rich';
+import { SubsidyCard } from './SubsidyCard';
 
 interface Props {
   goal: Goal;
@@ -268,9 +269,13 @@ export function GoalTab({ goal, start, planned, dyn2027, data, termijnbedrag }: 
         <Rich as="p" className="hint">
           Aannames: {fmt.eur(ppPrice)} per module van {fmt.kwh(ppKwh)}, elke module met een eigen omvormer van {ppKw.toFixed(1).replace('.', ',')} kW. Delen modules één omvormer, zet het vermogen dan lager.
           De prijzen zijn jouw schatting, niet gecontroleerd; vraag actuele prijzen na. Het model gaat uit van perfecte aansturing op prijs en zon. Een stekkerbatterij die alleen de P1-meter volgt
-          doet vooral zelfverbruik, en dat levert in dit model ongeveer evenveel op. Zulke batterijen hebben geen noodstroom, en je moet nagaan of ze aan één fase hangen en wat dat voor jouw meter betekent.
+          doet vooral zelfverbruik, en dat levert in dit model iets minder op: goedkoop inkopen op het net is het kleinste deel van de winst. Zulke batterijen hebben geen noodstroom, en je moet nagaan of ze aan één fase hangen en wat dat voor jouw meter betekent.
         </Rich>
       </Card>
+
+      <SubsidyCard
+        battery={ppRows[2] ? { modules: 3, kwh: ppRows[2].kwh, price: 3 * ppPrice, saving: ppKey[2] } : null}
+      />
     </>
   );
 }

@@ -5,8 +5,6 @@ import type { Scenario, SimResult, YearData } from './types';
 const BTW = 1.21;
 /** laadverlies tussen stopcontact en accu van de auto */
 const EV_LAADRENDEMENT = 0.9;
-/** minimale winst per kWh (na rendementsverlies) om van het net te laden */
-const MIN_SPREAD = 0.02;
 
 /** Dal: werkdagen vanaf 21 of 23 uur tot 07 uur en het hele weekend (verschilt per netbeheerder). */
 export function isDal(cal: Calendar, i: number, dalVanafUur: number): boolean {
@@ -56,13 +54,79 @@ export function effectiveFixedFeedIn(s: Scenario): number {
   return Math.max(c.terugleververgoeding, s.belasting.minVergoedingFractie * kaalExcl);
 }
 
-function quantile(sorted: number[], q: number): number {
-  const pos = (sorted.length - 1) * q;
-  const lo = Math.floor(pos);
-  const hi = Math.ceil(pos);
-  return sorted[lo] + (sorted[hi] - sorted[lo]) * (pos - lo);
+/**
+ * Plan voor de prijsgestuurde batterij: dynamisch programmeren over het hele jaar.
+ * Per uur kiest het plan hoeveel de lading verandert (in stappen van de capaciteit), met als doel de laagste netto kosten:
+ * afname tegen de uurprijs, teruglevering tegen de waarde van dat uur. Laden gaat eerst uit zonne-overschot, de rest van het net.
+ * Ontladen kan alleen tot de vraag van dat uur. Het rendement zit in de stappen verwerkt, dus een cyclus loont pas als het
+ * prijsverschil de verliezen overstijgt. Aanname: alle prijzen en de opbrengst van de zon zijn vooraf bekend (optimistisch).
+ */
+function planBattery(
+  demand: Float64Array,
+  solar: Float64Array,
+  importPrice: Float64Array,
+  exportValue: Float64Array,
+  cap: number,
+  pmax: number,
+  eff1: number,
+): { charge: Float64Array; discharge: Float64Array; startSoc: number } {
+  const K = Math.min(96, Math.max(24, Math.round(cap / 0.06)));
+  const step = cap / K;
+  const up = Math.floor((pmax * eff1) / step + 1e-9);
+  const down = Math.floor(pmax / (eff1 * step) + 1e-9);
+  const width = K + 1;
+  const next = new Int16Array(HOURS * width);
+  let V = new Float64Array(width);
+  let W = new Float64Array(width);
+  for (let i = HOURS - 1; i >= 0; i--) {
+    const D = Math.max(demand[i] - solar[i], 0);
+    const S = Math.max(solar[i] - demand[i], 0);
+    const ip = importPrice[i];
+    const xv = exportValue[i];
+    const stay = ip * D - xv * S;
+    for (let k = 0; k <= K; k++) {
+      let best = V[k] + stay;
+      let bestN = k;
+      // De kosten zijn convex in de nieuwe lading: vanaf de huidige stand zoeken we in beide richtingen tot het niet meer beter wordt.
+      for (let nk = k + 1; nk <= Math.min(K, k + up); nk++) {
+        const c = ((nk - k) * step) / eff1;
+        const fromPv = Math.min(S, c);
+        const cost = ip * (D + c - fromPv) - xv * (S - fromPv) + V[nk];
+        if (cost < best - 1e-9) {
+          best = cost;
+          bestN = nk;
+        } else break;
+      }
+      if (bestN === k) {
+        for (let nk = k - 1; nk >= Math.max(0, k - down); nk--) {
+          const d = (k - nk) * step * eff1;
+          if (d > D + 1e-9) break;
+          const cost = ip * (D - d) - xv * S + V[nk];
+          if (cost < best - 1e-9) {
+            best = cost;
+            bestN = nk;
+          } else break;
+        }
+      }
+      W[k] = best;
+      next[i * width + k] = bestN;
+    }
+    const swap = V;
+    V = W;
+    W = swap;
+  }
+  const charge = new Float64Array(HOURS);
+  const discharge = new Float64Array(HOURS);
+  let k = Math.round(0.2 * K);
+  const startSoc = k * step;
+  for (let i = 0; i < HOURS; i++) {
+    const nk = next[i * width + k];
+    if (nk > k) charge[i] = ((nk - k) * step) / eff1;
+    else if (nk < k) discharge[i] = (k - nk) * step * eff1;
+    k = nk;
+  }
+  return { charge, discharge, startSoc };
 }
-
 /**
  * Vast huishoudverbruik per uur (zonder auto en batterij), ook per onderdeel. Gecachet op de laatste
  * invoer, omdat de contractvergelijking hetzelfde huishouden vaak achter elkaar doorrekent.
@@ -127,30 +191,15 @@ export function simulate(s: Scenario, data: YearData): SimResult {
   const evDaily = evAnnualKwh(s) / 365;
   let evChargedToday = 0;
 
-  const bat = s.batterij;
-  const cap = bat.aan ? bat.capaciteitKwh : 0;
-  const pmax = bat.aan ? bat.vermogenKw : 0;
-  const eff1 = Math.sqrt(Math.max(0.5, bat.rendement));
-  let socNow = cap * 0.2;
-
-  // Dagelijkse prijsdrempels voor de prijsgestuurde batterijstrategie.
-  let dayLow = 0;
-  let dayHigh = 0;
+  // Eerst de vraag per uur (huishouden plus auto): die hangt niet af van de batterij.
+  const demandArr = new Float64Array(HOURS);
   let currentDay = -1;
-
-  const curtail = s.contract.type === 'dynamisch' && s.contract.afschakelenBijNegatief;
-
   for (let i = 0; i < HOURS; i++) {
     const d = cal.day[i];
     const h = cal.hour[i];
     if (d !== currentDay) {
       currentDay = d;
       evChargedToday = 0;
-      const start = cal.dayStart[d];
-      const end = d + 1 < cal.dayStart.length ? cal.dayStart[d + 1] : HOURS;
-      const prices = Array.from(importPrice.subarray(start, end)).sort((a, b) => a - b);
-      dayLow = quantile(prices, 0.25);
-      dayHigh = prices[prices.length - 1];
     }
 
     // EV: om 18:00 de resterende dagbehoefte inplannen.
@@ -193,6 +242,31 @@ export function simulate(s: Scenario, data: YearData): SimResult {
       }
     }
     evLoad[i] += evPlanned[i];
+    demandArr[i] = demand;
+  }
+
+  const bat = s.batterij;
+  const cap = bat.aan ? bat.capaciteitKwh : 0;
+  const pmax = bat.aan ? bat.vermogenKw : 0;
+  const eff1 = Math.sqrt(Math.max(0.5, bat.rendement));
+  const curtail = s.contract.type === 'dynamisch' && s.contract.afschakelenBijNegatief;
+  const feedIn = s.contract.terugleverkostenAan ? s.contract.terugleverkostenPerKwh : 0;
+  const saldering = s.regime === 'saldering';
+
+  // Waarde van een teruggeleverde kWh, zoals de uurlus hieronder hem behandelt.
+  const exportValue = new Float64Array(HOURS);
+  for (let i = 0; i < HOURS; i++) {
+    const v = exportPrice[i] + (saldering ? s.belasting.energiebelasting : 0);
+    exportValue[i] = curtail && v < 0 ? 0 : v - feedIn;
+  }
+
+  // Prijsgestuurde strategie: vooraf een plan voor het hele jaar (perfecte voorspelling, dus optimistisch).
+  const plan = cap > 0 && pmax > 0 && bat.strategie === 'dynamisch' ? planBattery(demandArr, solarArr, importPrice, exportValue, cap, pmax, eff1) : null;
+  let socNow = plan ? plan.startSoc : cap * 0.2;
+
+  for (let i = 0; i < HOURS; i++) {
+    const solar = solarArr[i];
+    const demand = demandArr[i];
 
     const direct = Math.min(solar, demand);
     let surplus = solar - direct;
@@ -202,28 +276,16 @@ export function simulate(s: Scenario, data: YearData): SimResult {
     let gridCharge = 0;
     let discharge = 0;
     if (cap > 0) {
-      charge = Math.min(surplus, pmax, (cap - socNow) / eff1);
-      surplus -= charge;
-      if (bat.strategie === 'dynamisch') {
-        const p = importPrice[i];
-        // alleen "goedkoop" als er vandaag nog een duidelijk duurder uur komt (niet bij vlakke tarieven)
-        const cheap = p <= dayLow && dayHigh - p > MIN_SPREAD;
-        const room = Math.min(pmax - charge, (cap - socNow) / eff1 - charge);
-        if (cheap && room > 0 && dayHigh * bat.rendement - p > MIN_SPREAD) {
-          // Laad van het net tot er genoeg in zit om de duurdere uren te overbruggen
-          // tot de zon het huis weer zelf voedt (perfecte voorspelling, dus optimistisch).
-          let need = 0;
-          for (let j = i + 1; j < Math.min(HOURS, i + 24); j++) {
-            const net = baseLoad[j] - solarArr[j];
-            if (net <= 0) break;
-            if (importPrice[j] * bat.rendement - p > MIN_SPREAD) need += net;
-          }
-          const target = Math.min(cap, need / eff1);
-          gridCharge = Math.min(room, Math.max(0, target - socNow) / eff1);
-        }
-        // In de goedkoopste uren bewaren we de lading voor later.
-        if (!cheap) discharge = Math.min(deficit, pmax, socNow * eff1);
+      if (plan) {
+        const total = Math.min(plan.charge[i], (cap - socNow) / eff1);
+        charge = Math.min(surplus, total);
+        gridCharge = total - charge;
+        surplus -= charge;
+        discharge = Math.min(plan.discharge[i], deficit, socNow * eff1);
       } else {
+        // Eigen verbruik: laden uit overschot, ontladen zodra er een tekort is.
+        charge = Math.min(surplus, pmax, (cap - socNow) / eff1);
+        surplus -= charge;
         discharge = Math.min(deficit, pmax, socNow * eff1);
       }
       socNow += (charge + gridCharge) * eff1 - discharge / eff1;
@@ -231,9 +293,9 @@ export function simulate(s: Scenario, data: YearData): SimResult {
 
     // Onder saldering levert teruggeleverde stroom ook verrekende energiebelasting op,
     // dus pas afschakelen als de uurprijs dieper negatief is dan die belasting.
-    const exportValue = exportPrice[i] + (s.regime === 'saldering' ? s.belasting.energiebelasting : 0);
+    const exportNow = exportPrice[i] + (saldering ? s.belasting.energiebelasting : 0);
     let exported = surplus;
-    if (curtail && exportValue < 0) {
+    if (curtail && exportNow < 0) {
       curtailed[i] = exported;
       exported = 0;
     }
