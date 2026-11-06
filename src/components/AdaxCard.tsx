@@ -42,6 +42,28 @@ export function AdaxCard() {
     return { perRoom, labels, titles, days: complete.length, perDayTotal };
   }, [data, now]);
 
+  // gemeten verbruik per klokuur, laatste 48 uur
+  const hourly = useMemo(() => {
+    if (!data?.uur?.length) return null;
+    const HOUR = 3_600_000;
+    const end = Math.floor(now / HOUR) * HOUR;
+    const hours = Array.from({ length: 48 }, (_, i) => end - (47 - i) * HOUR);
+    const rooms = data.uur.map((r, i) => {
+      const m = new Map(r.punten);
+      return { key: r.id, label: r.naam, color: COLORS[i % COLORS.length], values: hours.map((h) => (m.get(h) ?? 0) / 1000) };
+    });
+    if (!rooms.some((r) => r.values.some((v) => v > 0))) return null;
+    return {
+      rooms,
+      labels: hours.map((h) => new Date(h).toLocaleTimeString('nl-NL', { hour: '2-digit', timeZone: 'Europe/Amsterdam' })),
+      titles: hours.map(
+        (h) =>
+          new Date(h).toLocaleString('nl-NL', { weekday: 'short', day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit', timeZone: 'Europe/Amsterdam' }) +
+          (h === end ? ' (loopt nog)' : ''),
+      ),
+    };
+  }, [data, now]);
+
   if (error) return null;
   if (!data) return null;
 
@@ -82,12 +104,29 @@ export function AdaxCard() {
         format={(v) => `${v.toFixed(1)} kWh`}
         extraRows={(i) => [{ label: 'Samen', value: `${stats.perRoom.reduce((s, r) => s + r.values[i], 0).toFixed(1)} kWh`, strong: true }]}
       />
+      {hourly && (
+        <>
+          <h3 className="mini-title">Per uur, laatste 48 uur</h3>
+          <StackedColumns
+            ariaLabel="Gestapelde kolommen: verbruik per uur van elke Adax-radiator in kWh"
+            categories={hourly.labels}
+            categoryTitles={hourly.titles}
+            up={hourly.rooms.map((r) => ({ key: r.key, label: r.label, color: r.color }))}
+            down={[]}
+            values={Object.fromEntries(hourly.rooms.map((r) => [r.key, r.values]))}
+            height={200}
+            tickEvery={6}
+            format={(v) => `${v.toFixed(2)} kWh`}
+            extraRows={(i) => [{ label: 'Samen', value: `${hourly.rooms.reduce((s, r) => s + r.values[i], 0).toFixed(2)} kWh`, strong: true }]}
+          />
+        </>
+      )}
       <div className="supplier-list" role="list">
         {[...stats.perRoom]
           .sort((a, b) => b.perDay - a.perDay)
           .map((r) => (
             <div key={r.key} role="listitem" className="supplier">
-              <div className="supplier-row">
+              <div className="supplier-row battery-row duo-row">
                 <span className="supplier-name">
                   <strong>{r.label}</strong>
                   <Rich as="span" className="supplier-sub">{fmt.kwh(r.perDay)} per dag gemiddeld</Rich>
@@ -100,8 +139,9 @@ export function AdaxCard() {
           ))}
       </div>
       <Rich as="p" className="hint">
-        Dit zijn de dagtotalen van Adax zelf (van 04:00 tot 04:00), niet geschat. Adax geeft maximaal een week terug en per dag, geen
-        uurwaarden. Daarom bewaart het dashboard elke dag wat het ophaalt, zodat de geschiedenis groeit. Alleen de ruimtes in de
+        Dit zijn de dagtotalen van Adax zelf (van 04:00 tot 04:00), niet geschat. Adax geeft maximaal een week terug en per dag. Daarom bewaart het dashboard elke dag wat het ophaalt, zodat de geschiedenis groeit.
+        De uurgrafiek komt uit de lopende meetwaarde van Adax, die binnen elk uur oploopt; per uur nemen we de hoogste waarde. De laatste minuten van elk
+        uur zien we daardoor niet, dus de uurwaarden zijn een klein beetje te laag. Alleen de ruimtes in de
         Adax-app staan erin: pelletkachel, boiler en airco niet. Laatste synchronisatie:{' '}
         {data.lastSync ? new Date(data.lastSync).toLocaleString('nl-NL') : 'nog niet'}.
       </Rich>

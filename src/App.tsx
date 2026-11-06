@@ -554,6 +554,7 @@ export default function App() {
                   vastDal={startpunt.contract.tariefDal + startpunt.belasting.energiebelasting}
                   dalVanafUur={startpunt.belasting.dalVanafUur}
                   vasteDeel={(presetMap.dyn2027?.apply(startpunt).contract.opslag ?? 0.018) + startpunt.belasting.energiebelasting}
+                  terugleverOpslag={presetMap.dyn2027?.apply(startpunt).contract.terugleverOpslag ?? 0.018}
                 />
               )}
             </>

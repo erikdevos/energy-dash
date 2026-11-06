@@ -2,7 +2,7 @@ import { useCallback, useEffect, useMemo, useState } from 'react';
 import { api } from '../lib/api';
 import { usePoll, useNow } from '../lib/usePoll';
 import { type Appliance } from '../model/appliances';
-import { flexTips, sessionCost, winterProfile, FLEX } from '../model/tips';
+import { flexTips, sessionCost, winterProfile, zelfGebruikWaarde, FLEX } from '../model/tips';
 import type { YearData } from '../model/types';
 import { Card } from './Card';
 import { fmt } from './charts/scale';
@@ -17,6 +17,8 @@ interface Props {
   dalVanafUur: number;
   /** vaste delen van de dynamische prijs per kWh: opslag en energiebelasting (incl. BTW) */
   vasteDeel: number;
+  /** kosten per teruggeleverde kWh bij een dynamisch contract */
+  terugleverOpslag: number;
 }
 
 /** Besparing als percentage van wat je werkelijk per kWh betaalt (beursprijs + BTW + opslag + belasting). */
@@ -27,7 +29,7 @@ const localHour = (d: Date) => Number(d.toLocaleTimeString('nl-NL', { hour: '2-d
 const localDay = (d: Date) => d.toLocaleDateString('sv-SE', { timeZone: 'Europe/Amsterdam' });
 
 /** Concrete tips om slim te plannen: gebaseerd op je apparatenlijst en de uurprijzen (historisch en vandaag/morgen). */
-export function TipsCard({ data, vastNormaal, vastDal, dalVanafUur, vasteDeel }: Props) {
+export function TipsCard({ data, vastNormaal, vastDal, dalVanafUur, vasteDeel, terugleverOpslag }: Props) {
   const [list, setList] = useState<Appliance[] | null>(null);
   useEffect(() => {
     api.apparaten().then((r) => setList(r.apparaten)).catch(() => setList([]));
@@ -43,6 +45,7 @@ export function TipsCard({ data, vastNormaal, vastDal, dalVanafUur, vasteDeel }:
     return hours;
   }, [today, now]);
 
+  const zon = useMemo(() => zelfGebruikWaarde(data.epex, data.priceYear, vasteDeel, terugleverOpslag), [data, vasteDeel, terugleverOpslag]);
   const dalVoordeel = vastNormaal - vastDal;
   const duurste = profile.indexOf(Math.max(...profile));
   const goedkoopste = profile.indexOf(Math.min(...profile));
@@ -117,6 +120,27 @@ export function TipsCard({ data, vastNormaal, vastDal, dalVanafUur, vasteDeel }:
             <Rich as="p" className="tip-text">
               Het daltarief is {fmt.perKwh(vastDal)} in plaats van {fmt.perKwh(vastNormaal)} per kWh. Dat werkt nu al, tot het einde van je contract.
             </Rich>
+          </li>
+        )}
+        {zon.perKwh > 0.005 && (
+          <li className="tip">
+            <div className="tip-head">
+              <span className="tip-name">Zonuren, vanaf 2027</span>
+              <span className="tip-badge">{zon.afname - zon.perKwh < 0.02 ? 'terugleveren levert ~niets' : `${Math.round((zon.perKwh / (zon.afname - zon.perKwh)) * 100)}% meer waard`}</span>
+            </div>
+            <p className="tip-big">Gebruik zelf wat je opwekt</p>
+            <Rich as="p" className="tip-text">
+              Zonder saldering levert een kWh terugleveren in de zonuren (11:00 tot 16:00, april tot en met september) gemiddeld {fmt.perKwh(zon.afname - zon.perKwh)} op,
+              terwijl zelf gebruiken je {fmt.perKwh(zon.afname)} aan afname scheelt: {fmt.perKwh(zon.perKwh)} meer per kWh. Een droogbeurt van 2,0 kWh is dan ongeveer {fmt.eur2(zon.perKwh * 2)} waard, een wasbeurt van 0,8 kWh ongeveer {fmt.eur2(zon.perKwh * 0.8)}.
+            </Rich>
+            <details className="tip-more">
+              <summary>Hoe is dit berekend</summary>
+              <Rich as="p">
+                Afname kost gemiddeld {fmt.perKwh(zon.afname)} per kWh (beursprijs {data.priceYear} met BTW, plus opslag en energiebelasting); teruglevering levert de beursprijs min
+                {' '}{fmt.perKwh(terugleverOpslag)} op. Het voordeel geldt alleen als de panelen op dat moment genoeg leveren, dus vooral op zonnige dagen. Het percentage is het voordeel
+                als deel van de afnameprijs.
+              </Rich>
+            </details>
           </li>
         )}
         <li className="tip">

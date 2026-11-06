@@ -116,3 +116,28 @@ export function bestStartAhead(prices: number[], uren: number, from: number, to:
   }
   return best;
 }
+
+/**
+ * Wat is een kWh zelf gebruiken in de zonuren waard ten opzichte van terugleveren, zonder saldering?
+ * Gemiddeld over april t/m september, 11:00 tot 16:00 lokaal. Afname kost beursprijs + BTW + opslag + belasting (`vasteDeel`),
+ * teruglevering levert beursprijs min de terugleverkosten (`terugleverOpslag`) op. Dynamisch contract als uitgangspunt.
+ */
+export function zelfGebruikWaarde(epex: ArrayLike<number>, year: number, vasteDeel: number, terugleverOpslag: number): { perKwh: number; afname: number } {
+  const parts = new Intl.DateTimeFormat('nl-NL', { timeZone: 'Europe/Amsterdam', hourCycle: 'h23', hour: 'numeric', month: 'numeric' });
+  const start = Date.UTC(year, 0, 1);
+  let sum = 0;
+  let buy = 0;
+  let n = 0;
+  for (let i = 0; i < epex.length; i++) {
+    const p = parts.formatToParts(new Date(start + i * 3_600_000));
+    const month = Number(p.find((x) => x.type === 'month')!.value);
+    const hour = Number(p.find((x) => x.type === 'hour')!.value);
+    if (month < 4 || month > 9 || hour < 11 || hour > 15) continue;
+    const afname = epex[i] * 1.21 + vasteDeel;
+    const terug = epex[i] - terugleverOpslag;
+    sum += afname - terug;
+    buy += afname;
+    n++;
+  }
+  return n ? { perKwh: sum / n, afname: buy / n } : { perKwh: 0, afname: 0 };
+}

@@ -13,8 +13,9 @@ const STORE = join(DATA_DIR, 'adax', 'hourly.json');
 const RAW = join(DATA_DIR, 'adax', 'last-content.json');
 const SYNC_MS = 6 * 3600_000;
 // De energy_log geeft in de praktijk alleen dagtotalen (04:00 tot 04:00), ondanks wat de documentatie zegt.
-// Per uur zit er wel in /content?withEnergy=1: het verbruik van het afgelopen uur per radiator (energyTime, meestal op :15).
-// Die laten we elke kwartier opvragen en bewaren, zodat er vanaf nu per uur per ruimte een reeks groeit.
+// Per uur zit er wel in /content?withEnergy=1: het verbruik van het huidige klokuur tot nu toe per radiator (energyWh bij energyTime).
+// De waarde loopt dus op binnen het uur en begint op het hele uur opnieuw bij ongeveer 0. Wij vragen hem elk kwartier op en nemen per uur
+// de hoogste waarde: dat mist alleen de laatste minuten van elk uur.
 const HOURLY = join(DATA_DIR, 'adax', 'uur.json');
 const HOURLY_MS = 15 * 60_000;
 
@@ -33,7 +34,7 @@ export interface AdaxResponse {
   lastSync: string | null;
   error: string | null;
   rooms: Array<{ id: string; naam: string; uren: Array<[number, number]> }>;
-  /** verbruik per uur (eindtijdstip, Wh) per ruimte, vanaf de eerste keer dat we dit bijhouden */
+  /** verbruik per klokuur (begin van het uur in ms, Wh) per ruimte, vanaf de eerste keer dat we dit bijhouden; het lopende uur is nog niet compleet */
   uur: Array<{ id: string; naam: string; punten: Array<[number, number]> }>;
 }
 
@@ -149,12 +150,18 @@ function runSync(): Promise<void> {
   return syncing;
 }
 
-/** Telt de radiatoren per ruimte op: eindtijdstip van het uur en Wh. */
+/** Per ruimte en klokuur: de hoogste waarde van de radiatoren in dat uur, opgeteld (begin van het uur in ms, Wh). */
 function hourlyByRoom(h: StoredHourly | null): AdaxResponse['uur'] {
   const byRoom = new Map<string, { naam: string; punten: Map<number, number> }>();
   for (const d of Object.values(h?.devices ?? {})) {
     const room = byRoom.get(d.roomId) ?? { naam: d.naam, punten: new Map<number, number>() };
-    for (const [t, wh] of Object.entries(d.uren)) room.punten.set(Number(t), (room.punten.get(Number(t)) ?? 0) + wh);
+    // eerst per uur de hoogste waarde van dit apparaat (de waarde loopt op binnen het uur), dan optellen over de apparaten van de ruimte
+    const perHour = new Map<number, number>();
+    for (const [t, wh] of Object.entries(d.uren)) {
+      const hour = Math.floor(Number(t) / 3_600_000) * 3_600_000;
+      perHour.set(hour, Math.max(perHour.get(hour) ?? 0, wh));
+    }
+    for (const [hour, wh] of perHour) room.punten.set(hour, (room.punten.get(hour) ?? 0) + wh);
     byRoom.set(d.roomId, room);
   }
   return [...byRoom].map(([id, r]) => ({ id, naam: r.naam, punten: [...r.punten].sort((a, b) => a[0] - b[0]) }));

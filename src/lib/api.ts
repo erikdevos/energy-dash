@@ -186,7 +186,7 @@ export interface AdaxData {
   lastSync: string | null;
   error: string | null;
   rooms: Array<{ id: string; naam: string; uren: Array<[number, number]> }>;
-  /** verbruik per uur (eindtijdstip, Wh) per ruimte, vanaf het moment dat dit wordt bijgehouden */
+  /** verbruik per klokuur (begin van het uur in ms, Wh) per ruimte, vanaf het moment dat dit wordt bijgehouden; het lopende uur is nog niet compleet */
   uur: Array<{ id: string; naam: string; punten: Array<[number, number]> }>;
 }
 
