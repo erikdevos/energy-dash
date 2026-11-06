@@ -29,6 +29,8 @@ interface Props {
   onTogglePlan: (id: PlanId) => void;
   insights: Insight[];
   onTab: (t: Tab) => void;
+  /** huidig vermogen in W (positief = afname), null zonder meting */
+  liveW: number | null;
   nowOutcome: Outcome;
   plannedOutcome: Outcome | null;
 }
@@ -39,40 +41,70 @@ export function Overview(p: Props) {
   const anyPlan = Object.values(p.plansOn).some(Boolean);
   const [splitView, setSplitView] = useState<'balken' | 'treemap'>('balken');
   const s = p.settlement;
+  const delta = p.statusQuo2027 - p.now;
+  // het plan dat het meest oplevert, van de plannen die aanstaan
+  const bestPlan = p.steps.filter((x) => x.kind === 'delta' && x.toggle?.on && x.value < 0).sort((a, b) => a.value - b.value)[0];
   return (
     <>
-      <section className="kpi-row span-2" aria-label="Kerncijfers">
-        <div className="kpi">
-          <span className="kpi-label">Dit jaar · eindnota 31 december</span>
-          {s ? (
-            <span className={`kpi-value ${s.saldo <= 0 ? 'good' : 'bad'}`}>
-              {s.saldo <= 0 ? `${fmt.eur(-s.saldo)} terug` : `${fmt.eur(s.saldo)} bijbetalen`}
-            </span>
-          ) : (
-            <span className="kpi-value">-</span>
-          )}
-          <Rich as="span" className="kpi-sub">Je vaste contract én de saldering stoppen op 1 januari 2027.</Rich>
-          <div className="kpi-inline">
-            <span className="k">Termijnbedrag per maand</span>
-            <TermijnInput value={p.termijnbedrag} onChange={p.onTermijnbedrag} />
+      <section className="sit span-2" aria-label="Jouw situatie">
+        <div className="sit-top">
+          <div className="sit-main">
+            <span className="eyebrow">Jouw situatie</span>
+            <h2 className="sit-title">Vanaf 2027 betaal je zo'n {fmt.eur(p.statusQuo2027)} per jaar voor stroom.</h2>
+            <Rich as="p" className="sit-sub">
+              {delta > 0
+                ? `Dat is ${fmt.eur(delta)} meer dan nu, vooral doordat de saldering stopt.`
+                : `Dat is ${fmt.eur(-delta)} minder dan nu.`}{' '}
+              {anyPlan
+                ? `Met jouw plannen blijft er ${fmt.eur(p.withPlans2027)} over${bestPlan ? `, met ${bestPlan.label.toLowerCase()} als grootste besparing (${fmt.eur(-bestPlan.value)} per jaar)` : ''}.`
+                : 'Zet hieronder je plannen aan om te zien wat ze opleveren.'}
+            </Rich>
+          </div>
+          <div className="sit-aside">
+            {p.liveW !== null && (
+              <span className="sit-live">
+                <span className="live-dot" aria-hidden="true" />
+                {p.liveW >= 0 ? 'Nu van het net' : 'Nu terug aan het net'} <strong>{fmt.one(Math.abs(p.liveW) / 1000)} kW</strong>
+              </span>
+            )}
+            <button type="button" className="primary-btn" onClick={() => p.onTab('doel')}>
+              Bekijk het plan
+            </button>
           </div>
         </div>
-        <div className="kpi">
-          <span className="kpi-label">Vanaf 2027 · zonder plannen</span>
-          <span className="kpi-value bad">{fmt.eur(p.statusQuo2027)} per jaar</span>
-          <Rich as="span" className="kpi-sub">
-            met een {contractName[p.contract]}. Nu is dat {fmt.eur(p.now)}: zo'n {fmt.eur(p.statusQuo2027 - p.now)} per jaar meer, vooral
-            doordat de saldering stopt.
-          </Rich>
-        </div>
-        <div className="kpi">
-          <span className="kpi-label">Vanaf 2027 · met jouw plannen</span>
-          <span className={`kpi-value ${anyPlan ? 'good' : ''}`}>{fmt.eur(p.withPlans2027)} per jaar</span>
-          <Rich as="span" className="kpi-sub">
-            {anyPlan
-              ? `Je plannen schelen zo'n ${fmt.eur(p.statusQuo2027 - p.withPlans2027)} per jaar.`
-              : 'Zet hieronder je plannen aan om te zien wat ze opleveren.'}
-          </Rich>
+        <div className="sit-stats">
+          <div className="stat-block">
+            <span className="kpi-label">Dit jaar · eindnota 31 december</span>
+            {s ? (
+              <span className={`kpi-value ${s.saldo <= 0 ? 'good' : 'bad'}`}>
+                {s.saldo <= 0 ? `${fmt.eur(-s.saldo)} terug` : `${fmt.eur(s.saldo)} bijbetalen`}
+              </span>
+            ) : (
+              <span className="kpi-value">-</span>
+            )}
+            <Rich as="span" className="kpi-sub">Je vaste contract én de saldering stoppen op 1 januari 2027.</Rich>
+            <div className="kpi-inline">
+              <span className="k">Termijnbedrag per maand</span>
+              <TermijnInput value={p.termijnbedrag} onChange={p.onTermijnbedrag} />
+            </div>
+          </div>
+          <div className="stat-block">
+            <span className="kpi-label">Vanaf 2027 · zonder plannen</span>
+            <span className="kpi-value bad">{fmt.eur(p.statusQuo2027)} per jaar</span>
+            <Rich as="span" className="kpi-sub">
+              met een {contractName[p.contract]}. Nu is dat {fmt.eur(p.now)}: zo'n {fmt.eur(p.statusQuo2027 - p.now)} per jaar meer, vooral
+              doordat de saldering stopt.
+            </Rich>
+          </div>
+          <div className="stat-block highlight">
+            <span className="kpi-label">Vanaf 2027 · met jouw plannen</span>
+            <span className={`kpi-value ${anyPlan ? 'good' : ''}`}>{fmt.eur(p.withPlans2027)} per jaar</span>
+            <Rich as="span" className="kpi-sub">
+              {anyPlan
+                ? `Je plannen schelen zo'n ${fmt.eur(p.statusQuo2027 - p.withPlans2027)} per jaar.`
+                : 'Zet hieronder je plannen aan om te zien wat ze opleveren.'}
+            </Rich>
+          </div>
         </div>
       </section>
 

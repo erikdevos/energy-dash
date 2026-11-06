@@ -33,7 +33,7 @@ interface Props {
 
 const M = { top: 10, right: 8, bottom: 26, left: 48 };
 const GAP = 2;
-const RADIUS = 4;
+const RADIUS = 6;
 
 /** Rechthoek met afgeronde data-kant (boven of onder), vierkant aan de basislijn. */
 function barPath(x: number, y: number, w: number, h: number, roundTop: boolean, roundBottom: boolean): string {
@@ -84,7 +84,7 @@ export function StackedColumns({
   const y = linear([ticks[0], ticks[ticks.length - 1]], [height - M.bottom, M.top]);
   const plotW = Math.max(0, width - M.left - M.right);
   const band = n ? plotW / n : 0;
-  const barW = Math.max(2, Math.min(24, band - GAP - Math.max(2, band * 0.25)));
+  const barW = Math.max(2, Math.min(30, band - GAP - Math.max(2, band * 0.22)));
   const y0 = y(0);
 
   const columns = categories.map((_, i) => {
@@ -164,8 +164,18 @@ export function StackedColumns({
               </text>
             </g>
           ))}
+          {hover !== null && (
+            <rect
+              x={M.left + band * hover + 1}
+              y={M.top}
+              width={Math.max(0, band - 2)}
+              height={height - M.top - M.bottom}
+              rx={8}
+              className="hover-band"
+            />
+          )}
           {columns.map((c, i) => (
-            <g key={i} opacity={hover === null || hover === i ? 1 : 0.5}>
+            <g key={i} opacity={hover === null || hover === i ? 1 : 0.45} className="col">
               {c.segs.map((s) => (
                 <path key={s.key} d={s.d} fill={s.color} />
               ))}

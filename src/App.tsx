@@ -13,6 +13,7 @@ import { GoalTab } from './components/GoalTab';
 import { computeGoal } from './model/goal';
 import { AppliancesTab } from './components/AppliancesTab';
 import { TipsCard } from './components/TipsCard';
+import { Icon } from './components/Icon';
 import { SuppliersTab } from './components/SuppliersTab';
 import { rankSuppliers, type SupplierData } from './model/suppliers';
 import { projectSettlement } from './model/settlement';
@@ -145,6 +146,16 @@ export default function App() {
     { id: 'apparaten', label: 'Apparaten' },
     { id: 'gegevens', label: 'Gegevens' },
   ];
+  const TAB_INTRO: Record<Tab, string> = {
+    overzicht: 'Je stroomkosten in het kort: nu, vanaf 2027, en wat elk plan oplevert.',
+    doel: 'De weg naar 2027: contract, batterij en slimmer gebruik naast elkaar.',
+    nu: 'Live van de meter, de prijzen van vandaag en morgen, en slimme tips.',
+    verbruik: 'Waar je stroom naartoe gaat, per onderdeel en per maand.',
+    scenarios: 'Speel met de schuifjes en zie direct wat het met je kosten doet.',
+    leveranciers: 'Vergelijk contracten en aanbieders voor na de saldering.',
+    apparaten: 'Wat elk apparaat verbruikt, wanneer het draait en op welke fase het hangt.',
+    gegevens: 'Afstemming op je jaarnota\'s, de bronnen en alle aannames.',
+  };
   const [tab, setTabState] = useState<Tab>(() => {
     const h = window.location.hash.slice(1) as Tab;
     return TABS.some((t) => t.id === h) ? h : 'overzicht';
@@ -439,29 +450,48 @@ export default function App() {
   );
 
   return (
-    <div className="app">
-      <header className="topbar">
-        <div>
-          <h1>Energiedashboard</h1>
-          <p className="topbar-sub">
-            All-electric huis{notas?.locatie ? ` in ${notas.locatie.plaats}` : ''} · {startpunt.zon.panelen} zonnepanelen · wat kost stroom straks, en wat levert slim schakelen op?
-          </p>
-        </div>
-        <div className="source-pills">
-          <span className={`pill ${live.data?.mode === 'live' ? 'pill-live' : ''}`}>
-            {live.data?.mode === 'live' ? `Meter live · ${(live.data.importW - live.data.exportW >= 0 ? '' : '−') + fmt.one(Math.abs(live.data.importW - live.data.exportW) / 1000)} kW` : 'Meter mock'}
+    <div className="app shell">
+      <aside className="sidebar">
+        <div className="brand">
+          <span className="brand-mark" aria-hidden="true">
+            <Icon name="nu" />
           </span>
-          <span className={`pill ${notas?.mock ? 'pill-warn' : ''}`}>
-            {notas?.mock ? 'Jaarnota mock' : `Afgestemd op ${target?.label ?? 'je metingen'}`}
+          <span className="brand-text">
+            <strong>Energie</strong>
+            <small>dashboard</small>
           </span>
         </div>
-        <nav className="tabs" aria-label="Onderdelen">
+        <nav className="side-nav" aria-label="Onderdelen">
           {TABS.map((t) => (
-            <button key={t.id} type="button" className={`tab ${tab === t.id ? 'active' : ''}`} aria-current={tab === t.id ? 'page' : undefined} onClick={() => setTab(t.id)}>
-              {t.label}
+            <button key={t.id} type="button" title={t.label} className={`nav-item ${tab === t.id ? 'active' : ''}`} aria-current={tab === t.id ? 'page' : undefined} onClick={() => setTab(t.id)}>
+              <Icon name={t.id} />
+              <span>{t.label}</span>
             </button>
           ))}
         </nav>
+        <div className="side-foot">
+          <div className={`live-chip ${live.data?.mode === 'live' ? 'is-live' : ''}`}>
+            <span className="live-dot" aria-hidden="true" />
+            <span className="live-text">
+              <small>{live.data?.mode === 'live' ? 'Meter live' : 'Meter mock'}</small>
+              {live.data?.mode === 'live' && <strong>{(live.data.importW - live.data.exportW >= 0 ? '' : '−') + fmt.one(Math.abs(live.data.importW - live.data.exportW) / 1000)} kW</strong>}
+            </span>
+          </div>
+          <span className={`side-note ${notas?.mock ? 'is-warn' : ''}`}>{notas?.mock ? 'Jaarnota mock' : `Afgestemd op ${target?.label ?? 'je metingen'}`}</span>
+          <ThemeToggle />
+        </div>
+      </aside>
+
+      <div className="main-col">
+      <header className="page-head">
+        <div>
+          <h1>{TABS.find((t) => t.id === tab)?.label}</h1>
+          <p>{TAB_INTRO[tab]}</p>
+        </div>
+        <div className="page-meta">
+          <span className="pill">All-electric{notas?.locatie ? ` · ${notas.locatie.plaats}` : ''}</span>
+          <span className="pill">{startpunt.zon.panelen} zonnepanelen</span>
+        </div>
       </header>
 
       <div className={`layout ${tab === 'scenarios' ? '' : 'no-controls'}`}>
@@ -485,6 +515,7 @@ export default function App() {
               onTogglePlan={(id) => update((s) => setPlan(s, startpunt, id, !planOn(s, startpunt, id)))}
               insights={insights}
               onTab={setTab}
+              liveW={live.data?.mode === 'live' ? live.data.importW - live.data.exportW : null}
               nowOutcome={reference}
               plannedOutcome={outcome}
             />
@@ -611,9 +642,7 @@ export default function App() {
           )}
         </main>
       </div>
-      <footer className="app-footer">
-        <ThemeToggle />
-      </footer>
+      </div>
     </div>
   );
 }

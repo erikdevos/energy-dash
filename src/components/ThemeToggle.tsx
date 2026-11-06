@@ -29,11 +29,10 @@ export function ThemeToggle() {
   }, [thema]);
   return (
     <div className="theme-toggle">
-      <span>Weergave</span>
       <Segmented
         value={thema}
         options={[
-          { value: 'systeem', label: 'Automatisch' },
+          { value: 'systeem', label: 'Auto' },
           { value: 'licht', label: 'Licht' },
           { value: 'donker', label: 'Donker' },
         ]}

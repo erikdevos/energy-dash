@@ -85,8 +85,19 @@ export function StepLines({
               </text>
             </g>
           ))}
+          <defs>
+            {series.map((s) => (
+              <linearGradient key={s.key} id={`area-${s.key}`} x1="0" y1="0" x2="0" y2="1">
+                <stop offset="0%" stopColor={s.color} stopOpacity="0.28" />
+                <stop offset="100%" stopColor={s.color} stopOpacity="0" />
+              </linearGradient>
+            ))}
+          </defs>
           {series.map((s) => (
-            <path key={s.key} d={path(s.values)} fill="none" stroke={s.color} strokeWidth={2} strokeLinejoin="round" strokeLinecap="round" />
+            <path key={`${s.key}-area`} d={`${path(s.values)} V${y(Math.max(0, ticks[0]))} H${x(0)} Z`} fill={`url(#area-${s.key})`} stroke="none" />
+          ))}
+          {series.map((s) => (
+            <path key={s.key} d={path(s.values)} fill="none" stroke={s.color} strokeWidth={2.5} strokeLinejoin="round" strokeLinecap="round" />
           ))}
           {categories.map((label, i) =>
             i % tickEvery === 0 ? (

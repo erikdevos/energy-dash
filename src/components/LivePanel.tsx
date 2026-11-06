@@ -104,12 +104,20 @@ export function LivePanel({ live, sinceNota }: Props) {
           <span className="live-label">{net >= 0 ? 'Je neemt nu af' : 'Je levert nu terug'}</span>
           <span className="live-value">{r ? kw(Math.abs(net)) : '...'}</span>
           {r?.phases && (
-            <div className="phase-row">
-              {r.phases.map((p) => (
-                <span key={p.phase}>
-                  {p.phase} <strong>{fmt.int(p.importW - p.exportW)} W</strong>
-                </span>
-              ))}
+            <div className="phase-bars" aria-label="Vermogen per fase">
+              {r.phases.map((p) => {
+                const w = p.importW - p.exportW;
+                const scale = Math.max(1000, ...(r.phases ?? []).map((x) => Math.abs(x.importW - x.exportW)));
+                return (
+                  <div key={p.phase} className="phase-bar">
+                    <span className="phase-name">{p.phase}</span>
+                    <span className="phase-track">
+                      <span className={`phase-fill ${w < 0 ? 'back' : ''}`} style={{ width: `${Math.min(100, (Math.abs(w) / scale) * 100)}%` }} />
+                    </span>
+                    <strong className="phase-w">{fmt.int(w)} W</strong>
+                  </div>
+                );
+              })}
             </div>
           )}
         </div>
