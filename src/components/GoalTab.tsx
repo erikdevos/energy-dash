@@ -91,21 +91,33 @@ export function GoalTab({ goal, start, planned, dyn2027, data, termijnbedrag }: 
 
   return (
     <>
-      <section className="kpi-row span-2" aria-label="Doel 2027">
-        <div className="kpi">
-          <span className="kpi-label">Extra kosten door het einde van saldering</span>
-          <span className="kpi-value bad">{fmt.eur(goal.extra)}</span>
-          <Rich as="span" className="kpi-sub">per jaar, met een dynamisch contract en zonder maatregelen (vast: {fmt.eur(goal.vast - goal.now)}).</Rich>
+      <section className="sit span-2" aria-label="Doel 2027">
+        <div className="sit-top">
+          <div className="sit-main">
+            <span className="eyebrow">Doel 2027</span>
+            <h2 className="sit-title">Van {fmt.eur(goal.extra)} extra kosten naar {fmt.eur(Math.max(0, remaining))} per jaar.</h2>
+            <Rich as="p" className="sit-sub">
+              Zonder maatregelen kost het einde van de saldering je {fmt.eur(goal.extra)} per jaar extra. Met wat al vaststaat, gedrag dat niets kost en
+              de investeringen hieronder houd je {fmt.eur(Math.max(0, remaining))} per jaar over.
+            </Rich>
+          </div>
         </div>
-        <div className="kpi">
-          <span className="kpi-label">Kozijnen en Daikin</span>
-          <span className="kpi-value good">{fmt.eur(besloten)}</span>
-          <Rich as="span" className="kpi-sub">per jaar minder. Daarna nog {fmt.eur(gedragSaving)} met gedrag dat niets kost en {fmt.eur(invest)} met de rest.</Rich>
-        </div>
-        <div className="kpi">
-          <span className="kpi-label">Wat er overblijft</span>
-          <span className="kpi-value">{fmt.eur(Math.max(0, remaining))}</span>
-          <Rich as="span" className="kpi-sub">per jaar extra ten opzichte van nu (2027: {fmt.eur(seq.end)} in totaal, nu {fmt.eur(goal.now)}).</Rich>
+        <div className="sit-stats">
+          <div className="stat-block">
+            <span className="kpi-label">Extra kosten door het einde van saldering</span>
+            <span className="kpi-value bad">{fmt.eur(goal.extra)}</span>
+            <Rich as="span" className="kpi-sub">per jaar, met een dynamisch contract en zonder maatregelen (vast: {fmt.eur(goal.vast - goal.now)}).</Rich>
+          </div>
+          <div className="stat-block">
+            <span className="kpi-label">Kozijnen en Daikin</span>
+            <span className="kpi-value good">{fmt.eur(besloten)}</span>
+            <Rich as="span" className="kpi-sub">per jaar minder. Daarna nog {fmt.eur(gedragSaving)} met gedrag dat niets kost en {fmt.eur(invest)} met de rest.</Rich>
+          </div>
+          <div className="stat-block highlight">
+            <span className="kpi-label">Wat er overblijft</span>
+            <span className="kpi-value">{fmt.eur(Math.max(0, remaining))}</span>
+            <Rich as="span" className="kpi-sub">per jaar extra ten opzichte van nu (2027: {fmt.eur(seq.end)} in totaal, nu {fmt.eur(goal.now)}).</Rich>
+          </div>
         </div>
       </section>
 

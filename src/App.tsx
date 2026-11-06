@@ -419,7 +419,16 @@ export default function App() {
             <p>Draait de API-server? Start alles met <code>npm run dev</code>.</p>
           </>
         ) : (
-          <p>Jaarnota's, uurprijzen en zonprofiel ophalen en het model afstemmen... (de eerste keer duurt dit een paar seconden)</p>
+          <>
+            <span className="boot-mark" aria-hidden="true">
+              <Icon name="nu" />
+            </span>
+            <h1>Even geduld</h1>
+            <p>Jaarnota's, uurprijzen en zonprofiel ophalen en het model afstemmen. De eerste keer duurt dit een paar seconden.</p>
+            <span className="boot-bar" aria-hidden="true">
+              <span />
+            </span>
+          </>
         )}
       </div>
     );

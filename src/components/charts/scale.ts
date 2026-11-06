@@ -48,9 +48,9 @@ export const fmt = {
   int: (v: number) => nf0.format(v),
   one: (v: number) => nf1.format(v),
   kwh: (v: number) => `${Math.abs(v) >= 100 ? nf0.format(v) : nf1.format(v)} kWh`,
-  eur: (v: number) => `€ ${nf0.format(v)}`,
-  eur2: (v: number) => `€ ${nf2.format(v)}`,
-  perKwh: (v: number) => `€ ${nf3.format(v)}`,
+  eur: (v: number) => `€\u00A0${nf0.format(v)}`,
+  eur2: (v: number) => `€\u00A0${nf2.format(v)}`,
+  perKwh: (v: number) => `€\u00A0${nf3.format(v)}`,
   pct: (v: number) => `${nf0.format(v * 100)}%`,
   /** automatisch compact voor ticks */
   tick: (v: number) => (Math.abs(v) >= 1000 ? `${nf1.format(v / 1000)}k` : Math.abs(v) < 1 ? nfSmall.format(v) : nf1.format(v)),
