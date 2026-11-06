@@ -4,14 +4,18 @@ Speeltuin voor een all-electric huis met zonnepanelen. Je ziet wat stroom kost m
 
 ## Indeling
 
-- **Overzicht:** de kern op één scherm.
-  - Drie kernkaarten: dit jaar, 2027 zonder plannen, 2027 met plannen.
+De onderdelen staan in een zijbalk (op een telefoon als scrollbare navigatie). Licht, donker of automatisch kies je onderin de zijbalk.
+
+- **Overzicht:** één blok "Jouw situatie" met de kernzin en de drie stappen (dit jaar, 2027 zonder plannen, 2027 met plannen).
   - "De weg naar 2027": van je kosten nu, via het einde van de saldering, naar 2027, met per plan wat het terugwint. Plannen zet je aan of uit met de knoppen erboven.
   - Slimme inzichten in gewone taal.
-  - Waar je stroom naartoe gaat, nu en met je plannen.
-- **Nu:** live meter met advies, de verwachte eindnota, en de stroomprijzen van vandaag en morgen met de goedkoopste uren.
-- **Verbruik:** verbruik per onderdeel per maand, model tegen meting per maand, en het dagbeeld per uur.
+  - Waar je stroom naartoe gaat, als balken of treemap, nu en met je plannen.
+- **Doel 2027:** van de extra kosten na de saldering naar zo weinig mogelijk, met batterijen en de volgorde van maatregelen.
+- **Nu:** live meter met vermogen per fase en advies, de verwachte eindnota, de stroomprijzen van vandaag en morgen, en "Slim inplannen" (beste starttijd voor vaatwasser, wasmachine en droger, als percentage goedkoper).
+- **Verbruik:** verbruik per onderdeel per maand met een periodekeuze (ook over de jaarwisseling), als kolommen of treemap, model tegen meting per maand en het dagbeeld per uur.
 - **Scenario's:** de speeltuin met alle schuifjes, contractvergelijking en bewaarde scenario's.
+- **Leveranciers:** contracten en aanbieders voor na de saldering.
+- **Apparaten:** wat elk apparaat verbruikt, op welke fase(s) het hangt, dagbalans en Adax-metingen; de lijst ook als treemap.
 - **Gegevens:** afstemming op jaarnota's en maanddata, bronnen en aannames.
 
 ## Starten
@@ -81,6 +85,7 @@ Het dashboard stemt opwek en verbruik zo af dat afname én teruglevering van de 
   - `costs.ts`: kosten met en zonder saldering.
   - `defaults.ts`: tarieven met bron.
 - `src/components/`: het dashboard; grafieken zijn eigen SVG-componenten.
+- `src/index.css` en `src/styles/modern.css`: de opmaak. `modern.css` is de moderne laag (kleuren, zijbalk, kaarten) en komt als laatste, bovenop `index.css`.
 
 ## Belangrijkste aannames
 
