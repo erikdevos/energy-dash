@@ -12,6 +12,7 @@ import { PricesToday } from './components/PricesToday';
 import { GoalTab } from './components/GoalTab';
 import { computeGoal } from './model/goal';
 import { AppliancesTab } from './components/AppliancesTab';
+import { TipsCard } from './components/TipsCard';
 import { SuppliersTab } from './components/SuppliersTab';
 import { rankSuppliers, type SupplierData } from './model/suppliers';
 import { projectSettlement } from './model/settlement';
@@ -503,6 +504,15 @@ export default function App() {
                 vastNormaal={startpunt.contract.tariefNormaal + startpunt.belasting.energiebelasting}
                 vastDal={startpunt.contract.tariefDal + startpunt.belasting.energiebelasting}
               />
+              {data && (
+                <TipsCard
+                  data={data}
+                  vastNormaal={startpunt.contract.tariefNormaal + startpunt.belasting.energiebelasting}
+                  vastDal={startpunt.contract.tariefDal + startpunt.belasting.energiebelasting}
+                  dalVanafUur={startpunt.belasting.dalVanafUur}
+                  vasteDeel={(presetMap.dyn2027?.apply(startpunt).contract.opslag ?? 0.018) + startpunt.belasting.energiebelasting}
+                />
+              )}
             </>
           )}
 

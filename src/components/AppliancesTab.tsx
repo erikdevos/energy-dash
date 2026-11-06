@@ -7,6 +7,7 @@ import { WindowEffect } from './WindowEffect';
 import { Card } from './Card';
 import { Segmented } from './controls';
 import { StackedColumns } from './charts/StackedColumns';
+import { Treemap } from './charts/Treemap';
 import { fmt } from './charts/scale';
 import { Rich } from './Rich';
 
@@ -91,6 +92,7 @@ export function AppliancesTab({ modelKwh, pricePerKwh, boilerMonthly, kwp }: Pro
   }, [list]);
   const shown = useMemo(() => (room === 'alles' ? list : list.filter((a) => a.ruimte === room)), [list, room]);
   const prof = useMemo(() => profile(shown), [shown]);
+  const [view, setView] = useState<'lijst' | 'treemap'>('lijst');
   const ranked = useMemo(() => [...shown].sort((a, b) => yearlyKwh(b) - yearlyKwh(a)), [shown]);
   const max = Math.max(...ranked.map(yearlyKwh), 1);
 
@@ -238,12 +240,48 @@ export function AppliancesTab({ modelKwh, pricePerKwh, boilerMonthly, kwp }: Pro
         subtitle="Naar schatting per jaar. Klik een regel en pas vermogen of uren aan; de rest van het profiel rekent mee."
         className="span-2"
         actions={
-          <button type="button" className="ghost-btn" onClick={add}>
-            Apparaat toevoegen
-          </button>
+          <>
+            <Segmented
+              label="Weergave"
+              value={view}
+              options={[
+                { value: 'lijst', label: 'Lijst' },
+                { value: 'treemap', label: 'Treemap' },
+              ]}
+              onChange={setView}
+            />
+            <button type="button" className="ghost-btn" onClick={add}>
+              Apparaat toevoegen
+            </button>
+          </>
         }
       >
-        <div className="supplier-list" role="list">
+        {view === 'treemap' && (
+          <>
+            <Treemap
+              ariaLabel="Treemap: stroomverbruik per apparaat, gegroepeerd per categorie"
+              height={440}
+              format={(v) => fmt.kwh(v)}
+              items={ranked.map((a) => ({
+                id: a.id,
+                label: a.naam.split(' (')[0],
+                value: yearlyKwh(a),
+                group: a.categorie,
+                groupLabel: CATEGORIES[a.categorie].label,
+                color: CATEGORIES[a.categorie].color,
+                detail: `${fmt.eur2(yearlyKwh(a) * pricePerKwh).replace(',00', '')} per jaar`,
+              }))}
+              onSelect={(id) => {
+                setOpen(id);
+                setView('lijst');
+              }}
+            />
+            <Rich as="p" className="hint">
+              De oppervlakte van een vak is het verbruik per jaar, de kleur de categorie. Klik een vak om het apparaat in de lijst te openen en aan te passen.
+            </Rich>
+          </>
+        )}
+        <div className="supplier-list" role="list" style={view === 'lijst' ? undefined : { display: 'none' }}>
           {ranked.map((a, i) => {
             const y = yearlyKwh(a);
             const cat = CATEGORIES[a.categorie];

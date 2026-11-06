@@ -1,5 +1,6 @@
 import type { Outcome } from '../../model/types';
 import { fmt } from '../charts/scale';
+import { Treemap } from '../charts/Treemap';
 
 const PARTS = [
   { key: 'verwarming', label: 'Verwarming', color: 'var(--comp-4)', ink: '#fff' },
@@ -23,13 +24,45 @@ function totals(o: Outcome): Record<Key, number> {
 }
 
 /** Twee balken op dezelfde schaal: je verbruik nu en met je plannen, per onderdeel. */
-export function EnergySplit({ now, planned }: { now: Outcome; planned: Outcome | null }) {
+export function EnergySplit({ now, planned, view = 'balken' }: { now: Outcome; planned: Outcome | null; view?: 'balken' | 'treemap' }) {
   const rows = [
     { label: 'Nu', t: totals(now) },
     ...(planned ? [{ label: 'Met jouw plannen', t: totals(planned) }] : []),
   ];
   const max = Math.max(...rows.map((r) => Object.values(r.t).reduce((a, b) => a + b, 0)));
   const parts = PARTS.filter((p) => rows.some((r) => r.t[p.key] > 1));
+  if (view === 'treemap') {
+    // zelfde hoogte en een breedte naar verhouding van het totaal: de oppervlakte is dan op beide dezelfde schaal
+    return (
+      <div className="split-trees">
+        {rows.map((r) => {
+          const total = Object.values(r.t).reduce((a, b) => a + b, 0);
+          return (
+            <div key={r.label} className="split-tree" style={{ flex: `${total} 1 0` }}>
+              <div className="split-tree-head">
+                <strong>{r.label}</strong> <span className="muted">{fmt.kwh(total)} per jaar</span>
+              </div>
+              <Treemap
+                flat
+                height={320}
+                ariaLabel={`Treemap ${r.label}: ${parts.map((p) => `${p.label} ${fmt.kwh(r.t[p.key])}`).join(', ')}`}
+                format={(v) => fmt.kwh(v)}
+                items={parts.map((p) => ({
+                  id: p.key,
+                  label: p.label,
+                  value: r.t[p.key],
+                  group: p.key,
+                  groupLabel: p.label,
+                  color: p.color,
+                  detail: `${fmt.pct(total ? r.t[p.key] / total : 0)} van het totaal`,
+                }))}
+              />
+            </div>
+          );
+        })}
+      </div>
+    );
+  }
   return (
     <div className="split">
       {rows.map((r) => {

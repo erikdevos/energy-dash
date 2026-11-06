@@ -1,8 +1,10 @@
+import { useState } from 'react';
 import type { Insight } from '../../model/insights';
 import { PLAN_LABELS, PLAN_ORDER, type PlanId, type Step } from '../../model/overview';
 import type { Settlement } from '../../model/settlement';
 import type { Outcome } from '../../model/types';
 import { Card } from '../Card';
+import { Segmented } from '../controls';
 import { fmt } from '../charts/scale';
 import { TermijnInput } from '../Summary';
 import { EnergySplit } from './EnergySplit';
@@ -35,6 +37,7 @@ const contractName = { dyn2027: 'dynamisch contract', vast2027: 'vast contract' 
 
 export function Overview(p: Props) {
   const anyPlan = Object.values(p.plansOn).some(Boolean);
+  const [splitView, setSplitView] = useState<'balken' | 'treemap'>('balken');
   const s = p.settlement;
   return (
     <>
@@ -137,12 +140,23 @@ export function Overview(p: Props) {
         subtitle="Je verbruik in huis per jaar, per onderdeel. Verwarming en boiler zijn samen de helft."
         className="span-2"
         actions={
-          <button type="button" className="ghost-btn" onClick={() => p.onTab('verbruik')}>
-            Per maand
-          </button>
+          <>
+            <Segmented
+              label="Weergave"
+              value={splitView}
+              options={[
+                { value: 'balken', label: 'Balken' },
+                { value: 'treemap', label: 'Treemap' },
+              ]}
+              onChange={setSplitView}
+            />
+            <button type="button" className="ghost-btn" onClick={() => p.onTab('verbruik')}>
+              Per maand
+            </button>
+          </>
         }
       >
-        <EnergySplit now={p.nowOutcome} planned={anyPlan ? p.plannedOutcome : null} />
+        <EnergySplit now={p.nowOutcome} planned={anyPlan ? p.plannedOutcome : null} view={splitView} />
       </Card>
     </>
   );
