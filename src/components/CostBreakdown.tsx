@@ -8,7 +8,7 @@ export function CostBreakdown({ outcome, reference }: { outcome: Outcome; refere
   const max = Math.max(...outcome.costs.map((l) => Math.abs(l.eur)), 1);
   const refByKey = new Map(reference.costs.map((l) => [l.key, l.eur]));
   return (
-    <Card title="Kostenopbouw" subtitle="Per jaar, incl. BTW. Rechts betaal je, links krijg je terug.">
+    <Card title="Kostenopbouw" subtitle="Per jaar, incl. BTW. Rechts betaal je, links krijg je terug." className="span-2">
       <div className="breakdown">
         {lines.map((l) => {
           const w = (Math.abs(l.eur) / max) * 50;

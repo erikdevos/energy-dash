@@ -53,6 +53,7 @@ export function ComparePanel({ rows, batteryLabel, current, saved, onApply, onSa
     <Card
       title="Contracten vergeleken"
       subtitle="Voor jouw huidige huishouden (zon, verbruik, auto). Klik een vak om het over te nemen."
+      className="span-2"
     >
       <div className="table-wrap">
         <table className="matrix">

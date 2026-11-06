@@ -85,6 +85,11 @@
   --ring: 0 0 0 3px rgba(115, 136, 255, 0.38);
 }
 
+button {
+  -webkit-appearance: none;
+  appearance: none;
+}
+
 body {
   -webkit-font-smoothing: antialiased;
   font-variant-numeric: tabular-nums;
@@ -412,9 +417,11 @@ body {
 }
 
 .primary-btn {
-  background: linear-gradient(180deg, color-mix(in srgb, var(--accent) 92%, #fff), var(--accent));
+  /* vaste kleur in licht en donker: wit erop haalt 5,1:1 (de lichtere donkere accentkleur haalt maar 3,1:1) */
+  background: linear-gradient(180deg, #4a67ff, #3d5afe);
+  color: #fff;
   border-color: transparent;
-  box-shadow: 0 6px 14px -8px var(--accent);
+  box-shadow: 0 6px 14px -8px #3d5afe;
 }
 
 .chip {
@@ -1359,4 +1366,29 @@ input[type='radio'] {
 .tip-more p {
   margin: 8px 0 0;
   line-height: 1.5;
+}
+
+/* ---------- toegankelijkheid ---------- */
+
+.skip-link {
+  position: absolute;
+  left: 12px;
+  top: -60px;
+  z-index: 100;
+  padding: 10px 16px;
+  border: 0;
+  border-radius: 12px;
+  background: var(--text-primary);
+  color: var(--page);
+  font-weight: 650;
+  cursor: pointer;
+  transition: top 0.15s;
+}
+
+.skip-link:focus-visible {
+  top: 12px;
+}
+
+.content:focus {
+  outline: none;
 }

@@ -460,6 +460,9 @@ export default function App() {
 
   return (
     <div className="app shell">
+      <button type="button" className="skip-link" onClick={() => document.getElementById('inhoud')?.focus()}>
+        Ga naar de inhoud
+      </button>
       <aside className="sidebar">
         <div className="brand">
           <span className="brand-mark" aria-hidden="true">
@@ -506,7 +509,7 @@ export default function App() {
       <div className={`layout ${tab === 'scenarios' ? '' : 'no-controls'}`}>
         {tab === 'scenarios' && controls}
 
-        <main className={`content ${loading ? 'refreshing' : ''}`}>
+        <main id="inhoud" tabIndex={-1} className={`content ${loading ? 'refreshing' : ''}`}>
           {error && <p className="error-line">{error}</p>}
 
           {tab === 'overzicht' && road && (

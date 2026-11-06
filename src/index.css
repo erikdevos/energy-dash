@@ -129,34 +129,6 @@ button {
   min-height: 100vh;
 }
 
-.topbar {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 12px 24px;
-  align-items: center;
-  justify-content: space-between;
-  padding: 18px 24px;
-  border-bottom: 1px solid var(--border);
-  background: var(--surface-1);
-}
-
-.topbar h1 {
-  font-size: 30px;
-  font-weight: 650;
-  letter-spacing: -0.01em;
-}
-
-.topbar-sub {
-  color: var(--text-secondary);
-  margin-top: 2px;
-}
-
-.source-pills {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 6px;
-}
-
 .pill {
   display: inline-flex;
   align-items: center;
@@ -222,8 +194,7 @@ button {
     border-right: none !important;
     border-bottom: 1px solid var(--border);
   }
-  .content,
-  .topbar {
+  .content {
     padding-left: 16px;
     padding-right: 16px;
   }
@@ -1145,13 +1116,6 @@ input[type='range']::-moz-range-thumb {
   letter-spacing: -0.01em;
 }
 
-.phase-row {
-  display: flex;
-  gap: 12px;
-  font-size: 12px;
-  color: var(--text-secondary);
-}
-
 .live-today {
   margin-bottom: 0;
 }
@@ -1309,39 +1273,6 @@ input[type='range']::-moz-range-thumb {
 }
 
 /* ---------- tabs en indeling ---------- */
-
-.topbar {
-  row-gap: 14px;
-}
-
-.tabs {
-  display: flex;
-  gap: 4px;
-  width: 100%;
-  overflow-x: auto;
-  margin-bottom: -18px;
-}
-
-.tab {
-  border: none;
-  background: transparent;
-  padding: 10px 14px;
-  font-size: 14px;
-  font-weight: 550;
-  color: var(--text-secondary);
-  cursor: pointer;
-  border-bottom: 2px solid transparent;
-  white-space: nowrap;
-}
-
-.tab:hover {
-  color: var(--text-primary);
-}
-
-.tab.active {
-  color: var(--text-primary);
-  border-bottom-color: var(--accent);
-}
 
 .layout.no-controls {
   grid-template-columns: minmax(0, 1fr);
@@ -2041,20 +1972,6 @@ input[type='range']::-moz-range-thumb {
   font-size: 22px;
   font-weight: 650;
   letter-spacing: -0.01em;
-}
-
-.app-footer {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  justify-content: flex-end;
-  gap: 12px;
-  max-width: 1240px;
-  margin: 8px auto 0;
-  padding: 16px 0 32px;
-  border-top: 1px solid var(--border);
-  font-size: 13px;
-  color: var(--text-secondary);
 }
 
 .theme-toggle {
